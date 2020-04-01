@@ -61,12 +61,11 @@ public class RebootReceiver extends BroadcastReceiver {
         switch (action) {
             case Intent.ACTION_BOOT_COMPLETED:
                 sLogger.info("Android boot completed, restarting beacon broadcast...");
-                final BluetoothAdapter mBluetoothAdapter = ((BluetoothManager)context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+                final BluetoothAdapter mBluetoothAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
                 final boolean btResult = mBluetoothAdapter.enable();
                 if (btResult) {
                     sLogger.info("Enabling Bluetooth interface for beacon broadcast");
-                }
-                else {
+                } else {
                     sLogger.warn("Could not enable Bluetooth interface at reboot for beacon broadcast");
                 }
                 break;
