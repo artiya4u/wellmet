@@ -76,7 +76,7 @@ public class RebootReceiver extends BroadcastReceiver {
                 switch (btState) {
                     case BluetoothAdapter.STATE_ON:
                         sLogger.info("Bluetooth is ON, restarting beacon broadcast");
-                        // TODO
+                        App.getInstance().startResilientBeacons();
                         break;
                 }
                 break;

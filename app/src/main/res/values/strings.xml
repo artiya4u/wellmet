@@ -12,4 +12,16 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+
+    <string name="notif_message">Broadcasting your temporary ID</string>
+    <string name="notif_action_stop">Stop broadcasts</string>
+    <string name="notif_channel_name">Status</string>
+    <string name="notif_channel_description">Status of temporary ID broadcast.</string>
+
+    <string name="advertise_error_already_started">Error: advertise already started</string>
+    <string name="advertise_error_data_large">Error: data too large</string>
+    <string name="advertise_error_unsupported">Error: feature unsupported</string>
+    <string name="advertise_error_internal">Error: internal problem</string>
+    <string name="advertise_error_too_many">Error: too many advertisers</string>
+    <string name="advertise_error_unknown">Error: advertise unknown error</string>
 </resources>
