@@ -66,8 +66,6 @@ public class IBeaconService extends Service implements BootstrapNotifier, Beacon
         // iBeacon
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
-
-        beaconManager.bind(this);
     }
 
 
@@ -109,9 +107,11 @@ public class IBeaconService extends Service implements BootstrapNotifier, Beacon
 
     private void startScan() {
         Log.d(TAG, "Starting scan of beacons");
+        beaconManager.bind(this);
     }
 
     public void stopScan() {
+        beaconManager.unbind(this);
     }
 
     private void startAdvertise() {
@@ -145,7 +145,13 @@ public class IBeaconService extends Service implements BootstrapNotifier, Beacon
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 if (beacons.size() > 0) {
-                    Log.i(TAG, "The first beacon I see is about " + beacons.iterator().next().getDistance() + " meters away.");
+                    for (Beacon b : beacons) {
+                        Log.i(TAG, "ID: " + b.getId1() +
+                                " Major: " + b.getId2() +
+                                " Minor: " + b.getId3() +
+                                " Distance: " + b.getDistance() + " meters");
+
+                    }
                 }
             }
         });
