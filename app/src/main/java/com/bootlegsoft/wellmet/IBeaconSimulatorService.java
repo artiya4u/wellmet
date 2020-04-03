@@ -10,6 +10,10 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,11 +31,11 @@ import androidx.core.content.ContextCompat;
 import net.alea.beaconsimulator.bluetooth.ExtendedAdvertiseData;
 import net.alea.beaconsimulator.bluetooth.model.IBeacon;
 
-
 import org.greenrobot.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -52,6 +56,24 @@ public class IBeaconSimulatorService extends Service {
     private BluetoothLeAdvertiser mBtAdvertiser;
 
     private AdvertiseCallback mAdvertiseCallback;
+
+    private final ScanCallback mScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            sLogger.info("New BLE device found: {}", result.getDevice().getAddress());
+            System.out.println(result.getDevice().getAddress());
+        }
+
+        public void onBatchScanResults(List<ScanResult> results) {
+        }
+
+        public void onScanFailed(int errorCode) {
+            sLogger.error("BLE scan fail: {}", errorCode);
+        }
+    };
+    private boolean mIsScanning = false;
+    private BluetoothLeScanner mBleScanner;
 
     public class ServiceControl extends Binder {
     }
@@ -102,11 +124,13 @@ public class IBeaconSimulatorService extends Service {
             case ACTION_START: {
                 sLogger.info("Action: starting new broadcast");
                 startBroadcast(startId, false);
+                startBeaconScan();
                 break;
             }
             case ACTION_STOP: {
                 sLogger.debug("Action: stopping a broadcast");
                 stopBroadcast(startId, false);
+                stopBeaconScan();
                 break;
             }
             default: {
@@ -125,6 +149,30 @@ public class IBeaconSimulatorService extends Service {
         stopBroadcast(0, true);
         unregisterReceiver(mBroadcastReceiver);
         EventBus.getDefault().unregister(this);
+    }
+
+
+    private void startBeaconScan() {
+        if (mIsScanning) {
+            return;
+        }
+        sLogger.debug("Starting scan of beacons");
+        mIsScanning = true;
+        ScanSettings.Builder builder = new ScanSettings.Builder();
+        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+        mBleScanner = mBtAdapter.getBluetoothLeScanner();
+        mBleScanner.startScan(null, builder.build(), mScanCallback);
+    }
+
+    public void stopBeaconScan() {
+        if (!mIsScanning) {
+            return;
+        }
+        sLogger.debug("Stopping scan of beacons");
+        mIsScanning = false;
+        if (mBtAdapter.getState() == BluetoothAdapter.STATE_ON) {
+            mBleScanner.stopScan(mScanCallback);
+        }
     }
 
 
