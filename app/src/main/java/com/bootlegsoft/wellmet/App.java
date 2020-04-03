@@ -1,34 +1,27 @@
 package com.bootlegsoft.wellmet;
 
 import android.app.Application;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import android.util.Log;
 
 public class App extends Application {
-
-    private static final Logger sLogger = LoggerFactory.getLogger(App.class);
-
+    private static final String TAG = ".WellMet";
     private static App sInstance;
 
     public static App getInstance() {
         return sInstance;
     }
 
-
     @Override
     public void onCreate() {
-        sInstance = this;
         super.onCreate();
-        sLogger.info("Beacon simulator starting!");
+        Log.i(TAG, "Beacon simulator starting!");
 
         startResilientBeacons();
     }
 
 
     public void startResilientBeacons() {
-        IBeaconService.startBroadcast(this);
+        IBeaconService.start(this);
     }
 
 

@@ -4,44 +4,35 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.AdvertiseCallback;
-import android.bluetooth.le.AdvertiseData;
-import android.bluetooth.le.AdvertiseSettings;
-import android.bluetooth.le.BluetoothLeAdvertiser;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanResult;
-import android.bluetooth.le.ScanSettings;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.widget.Toast;
+import android.os.RemoteException;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
-import net.alea.beaconsimulator.bluetooth.ExtendedAdvertiseData;
-import net.alea.beaconsimulator.bluetooth.model.IBeacon;
 
-import org.greenrobot.eventbus.EventBus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconConsumer;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
+import org.altbeacon.beacon.startup.BootstrapNotifier;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 
-public class IBeaconService extends Service {
-
-    private static final Logger sLogger = LoggerFactory.getLogger(IBeaconService.class);
+public class IBeaconService extends Service implements BootstrapNotifier, BeaconConsumer {
+    private static final String TAG = "IBeaconService";
 
     private static final String PREFIX = "com.bootlegsoft.wellmet.service.";
     public static final String ACTION_START = PREFIX + "ACTION_START";
@@ -50,28 +41,9 @@ public class IBeaconService extends Service {
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
 
-    private BluetoothAdapter mBtAdapter;
-    private BluetoothLeAdvertiser mBtAdvertiser;
+    private BeaconManager beaconManager;
 
-    private AdvertiseCallback mAdvertiseCallback;
-
-    private final ScanCallback mScanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            super.onScanResult(callbackType, result);
-            sLogger.info("New BLE device found: {}", result.getDevice().getAddress());
-            System.out.println(result.getDevice().getAddress());
-        }
-
-        public void onBatchScanResults(List<ScanResult> results) {
-        }
-
-        public void onScanFailed(int errorCode) {
-            sLogger.error("BLE scan fail: {}", errorCode);
-        }
-    };
-    private boolean mIsScanning = false;
-    private BluetoothLeScanner mBleScanner;
+    private BackgroundPowerSaver backgroundPowerSaver;
 
     public class ServiceControl extends Binder {
     }
@@ -84,30 +56,20 @@ public class IBeaconService extends Service {
         return mBinder;
     }
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case BluetoothAdapter.ACTION_STATE_CHANGED: {
-                    final int btState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                    switch (btState) {
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            // TODO Notify Bluetooth off.
-                            break;
-                    }
-                    break;
-                }
-            }
-        }
-    };
-
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mBtAdapter = ((BluetoothManager) getSystemService(BLUETOOTH_SERVICE)).getAdapter();
-        registerReceiver(mBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+        backgroundPowerSaver = new BackgroundPowerSaver(this);
+        beaconManager = BeaconManager.getInstanceForApplication(this);
+
+        // iBeacon
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+
+        beaconManager.bind(this);
     }
+
 
     public static UUID getUUID() {
         return UUID.randomUUID(); // TODO Generate UUID from user phone number and hashing with date.
@@ -119,19 +81,19 @@ public class IBeaconService extends Service {
         String action = intent.getAction();
         switch (action) {
             case ACTION_START: {
-                sLogger.info("Action: starting new broadcast");
-                startBroadcast(startId, false);
-                startBeaconScan();
+                Log.i(TAG, "Action: starting new broadcast");
+                startAdvertise();
+                startScan();
                 break;
             }
             case ACTION_STOP: {
-                sLogger.debug("Action: stopping a broadcast");
-                stopBroadcast(startId, false);
-                stopBeaconScan();
+                Log.d(TAG, "Action: stopping a broadcast");
+                stopAdvertise();
+                stopScan();
                 break;
             }
             default: {
-                sLogger.warn("Unknown action asked");
+                Log.w(TAG, "Unknown action asked");
             }
 
         }
@@ -141,94 +103,67 @@ public class IBeaconService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        sLogger.debug("onDestroy() called");
-        stopBroadcast(0, true);
-        unregisterReceiver(mBroadcastReceiver);
-        EventBus.getDefault().unregister(this);
+        Log.d(TAG, "onDestroy() called");
     }
 
 
-    private void startBeaconScan() {
-        if (mIsScanning) {
-            return;
-        }
-        sLogger.debug("Starting scan of beacons");
-        mIsScanning = true;
-        ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
-        mBleScanner = mBtAdapter.getBluetoothLeScanner();
-        mBleScanner.startScan(null, builder.build(), mScanCallback);
+    private void startScan() {
+        Log.d(TAG, "Starting scan of beacons");
     }
 
-    public void stopBeaconScan() {
-        if (!mIsScanning) {
-            return;
-        }
-        sLogger.debug("Stopping scan of beacons");
-        mIsScanning = false;
-        if (mBtAdapter.getState() == BluetoothAdapter.STATE_ON) {
-            mBleScanner.stopScan(mScanCallback);
-        }
+    public void stopScan() {
+    }
+
+    private void startAdvertise() {
+
+    }
+
+    private void stopAdvertise() {
+
     }
 
 
-    public AdvertiseSettings generateADSettings() {
-        AdvertiseSettings.Builder builder = new AdvertiseSettings.Builder();
-        builder.setConnectable(false);
-        builder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM);
-        builder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
-        return builder.build();
+    @Override
+    public void didEnterRegion(Region region) {
+
     }
 
-    public ExtendedAdvertiseData generateADData() {
-        IBeacon beacon = new IBeacon();
-        beacon.setProximityUUID(getUUID());
-        beacon.setMajor(0xC0);
-        beacon.setMinor(0x19);
-        return new ExtendedAdvertiseData(beacon.generateAdvertiseData());
+    @Override
+    public void didExitRegion(Region region) {
+
     }
 
-    private void startBroadcast(int serviceStartId, boolean isRestart) {
-        if (!isRestart && mAdvertiseCallback != null) {
-            sLogger.info("Already broadcasting this beacon model, skipping");
-            return;
-        }
-        mBtAdvertiser = mBtAdapter.getBluetoothLeAdvertiser();
-        if (mBtAdvertiser == null || !mBtAdapter.isEnabled()) {
-            sLogger.warn("Bluetooth is off, doing nothing");
-            return;
-        }
-        final AdvertiseSettings settings = generateADSettings();
-        final ExtendedAdvertiseData exAdvertiseData = generateADData();
-        final AdvertiseData advertiseData = exAdvertiseData.getAdvertiseData();
-        mAdvertiseCallback = new MyAdvertiseCallback(serviceStartId);
-        mBtAdvertiser.startAdvertising(settings, advertiseData, mAdvertiseCallback);
+    @Override
+    public void didDetermineStateForRegion(int i, Region region) {
+
     }
 
-
-    private void stopBroadcast(int serviceStartId, boolean isRestart) {
-        try {
-            if (mBtAdvertiser != null) {
-                mBtAdvertiser.stopAdvertising(mAdvertiseCallback);
-            } else {
-                sLogger.warn("Not able to stop broadcast; mBtAdvertiser is null");
+    @Override
+    public void onBeaconServiceConnect() {
+        beaconManager.removeAllRangeNotifiers();
+        beaconManager.addRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                if (beacons.size() > 0) {
+                    Log.i(TAG, "The first beacon I see is about " + beacons.iterator().next().getDistance() + " meters away.");
+                }
             }
-        } catch (RuntimeException e) { // Can happen if BT adapter is not in ON state
-            sLogger.warn("Not able to stop broadcast; BT state: {}", mBtAdapter.isEnabled(), e);
-        }
-        if (!isRestart) {
-            updateNotification();
+        });
+
+        try {
+            beaconManager.startRangingBeaconsInRegion(new Region("com.bootlegsoft.wellmet.rangingRegion", null, null, null));
+        } catch (RemoteException e) {
         }
     }
 
 
-    public static void startBroadcast(Context context) {
+    public static void start(Context context) {
         final Intent intent = new Intent(context, IBeaconService.class);
         intent.setAction(ACTION_START);
         ContextCompat.startForegroundService(context, intent);
     }
 
-    public static void stopBroadcast(Context context) {
+    public static void stop(Context context) {
         final Intent intent = new Intent(context, IBeaconService.class);
         intent.setAction(ACTION_STOP);
         ContextCompat.startForegroundService(context, intent);
@@ -237,59 +172,6 @@ public class IBeaconService extends Service {
     public static void bindService(Context context, ServiceConnection serviceConnection) {
         Intent intent = new Intent(context, IBeaconService.class);
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    public static void unbindService(Context context, ServiceConnection serviceConnection) {
-        context.unbindService(serviceConnection);
-    }
-
-    public static boolean isBluetoothOn(Context context) {
-        final BluetoothAdapter bluetoothAdapter = ((BluetoothManager) context.getSystemService(BLUETOOTH_SERVICE)).getAdapter();
-        return (bluetoothAdapter != null && bluetoothAdapter.isEnabled());
-    }
-
-    public static boolean isBroadcastAvailable(Context context) {
-        final BluetoothAdapter bluetoothAdapter = ((BluetoothManager) context.getSystemService(BLUETOOTH_SERVICE)).getAdapter();
-        return bluetoothAdapter != null && bluetoothAdapter.isMultipleAdvertisementSupported();
-    }
-
-
-    private class MyAdvertiseCallback extends AdvertiseCallback {
-        int serviceStartId;
-
-        MyAdvertiseCallback(int serviceStartId) {
-            this.serviceStartId = serviceStartId;
-        }
-
-        public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            updateNotification();
-            sLogger.info("Success in starting broadcast");
-        }
-
-        public void onStartFailure(int errorCode) {
-            int reason;
-            switch (errorCode) {
-                case ADVERTISE_FAILED_ALREADY_STARTED:
-                    reason = R.string.advertise_error_already_started;
-                    break;
-                case ADVERTISE_FAILED_DATA_TOO_LARGE:
-                    reason = R.string.advertise_error_data_large;
-                    break;
-                case ADVERTISE_FAILED_FEATURE_UNSUPPORTED:
-                    reason = R.string.advertise_error_unsupported;
-                    break;
-                case ADVERTISE_FAILED_INTERNAL_ERROR:
-                    reason = R.string.advertise_error_internal;
-                    break;
-                case ADVERTISE_FAILED_TOO_MANY_ADVERTISERS:
-                    reason = R.string.advertise_error_too_many;
-                    break;
-                default:
-                    reason = R.string.advertise_error_unknown;
-            }
-            Toast.makeText(IBeaconService.this, reason, Toast.LENGTH_SHORT).show();
-            sLogger.warn("Error starting broadcasting: {}", reason);
-        }
     }
 
     private void updateNotification() {
