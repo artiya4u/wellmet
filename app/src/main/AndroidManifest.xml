@@ -39,7 +39,7 @@
                 <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
             </intent-filter>
         </receiver>
-        <service android:name=".IBeaconSimulatorService" />
+        <service android:name=".IBeaconService" />
     </application>
 
 </manifest>

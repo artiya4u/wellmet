@@ -28,7 +28,7 @@ public class App extends Application {
 
 
     public void startResilientBeacons() {
-        IBeaconSimulatorService.startBroadcast(this);
+        IBeaconService.startBroadcast(this);
     }
 
 

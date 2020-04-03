@@ -39,9 +39,9 @@ import java.util.List;
 import java.util.UUID;
 
 
-public class IBeaconSimulatorService extends Service {
+public class IBeaconService extends Service {
 
-    private static final Logger sLogger = LoggerFactory.getLogger(IBeaconSimulatorService.class);
+    private static final Logger sLogger = LoggerFactory.getLogger(IBeaconService.class);
 
     private static final String PREFIX = "com.bootlegsoft.wellmet.service.";
     public static final String ACTION_START = PREFIX + "ACTION_START";
@@ -49,8 +49,6 @@ public class IBeaconSimulatorService extends Service {
 
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
-
-    private static IBeaconSimulatorService sInstance;
 
     private BluetoothAdapter mBtAdapter;
     private BluetoothLeAdvertiser mBtAdvertiser;
@@ -109,7 +107,6 @@ public class IBeaconSimulatorService extends Service {
         super.onCreate();
         mBtAdapter = ((BluetoothManager) getSystemService(BLUETOOTH_SERVICE)).getAdapter();
         registerReceiver(mBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-        sInstance = this;
     }
 
     public static UUID getUUID() {
@@ -143,7 +140,6 @@ public class IBeaconSimulatorService extends Service {
 
     @Override
     public void onDestroy() {
-        sInstance = null;
         super.onDestroy();
         sLogger.debug("onDestroy() called");
         stopBroadcast(0, true);
@@ -227,19 +223,19 @@ public class IBeaconSimulatorService extends Service {
 
 
     public static void startBroadcast(Context context) {
-        final Intent intent = new Intent(context, IBeaconSimulatorService.class);
+        final Intent intent = new Intent(context, IBeaconService.class);
         intent.setAction(ACTION_START);
         ContextCompat.startForegroundService(context, intent);
     }
 
     public static void stopBroadcast(Context context) {
-        final Intent intent = new Intent(context, IBeaconSimulatorService.class);
+        final Intent intent = new Intent(context, IBeaconService.class);
         intent.setAction(ACTION_STOP);
         ContextCompat.startForegroundService(context, intent);
     }
 
     public static void bindService(Context context, ServiceConnection serviceConnection) {
-        Intent intent = new Intent(context, IBeaconSimulatorService.class);
+        Intent intent = new Intent(context, IBeaconService.class);
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -291,17 +287,17 @@ public class IBeaconSimulatorService extends Service {
                 default:
                     reason = R.string.advertise_error_unknown;
             }
-            Toast.makeText(IBeaconSimulatorService.this, reason, Toast.LENGTH_SHORT).show();
+            Toast.makeText(IBeaconService.this, reason, Toast.LENGTH_SHORT).show();
             sLogger.warn("Error starting broadcasting: {}", reason);
         }
     }
 
     private void updateNotification() {
-        final Intent activityIntent = new Intent(IBeaconSimulatorService.this, MainActivity.class);
-        final PendingIntent activityPendingIntent = PendingIntent.getActivity(IBeaconSimulatorService.this, 0, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        final Intent stopBroadcastIntent = new Intent(IBeaconSimulatorService.this, IBeaconSimulatorService.class);
+        final Intent activityIntent = new Intent(IBeaconService.this, MainActivity.class);
+        final PendingIntent activityPendingIntent = PendingIntent.getActivity(IBeaconService.this, 0, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        final Intent stopBroadcastIntent = new Intent(IBeaconService.this, IBeaconService.class);
         stopBroadcastIntent.setAction(ACTION_STOP);
-        final PendingIntent stopBroadcastPendingIntent = PendingIntent.getService(IBeaconSimulatorService.this, 0, stopBroadcastIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        final PendingIntent stopBroadcastPendingIntent = PendingIntent.getService(IBeaconService.this, 0, stopBroadcastIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Channel creation
             final CharSequence name = getString(R.string.notif_channel_name);
@@ -312,7 +308,7 @@ public class IBeaconSimulatorService extends Service {
             final NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
-        final NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(IBeaconSimulatorService.this, CHANNEL_ID);
+        final NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(IBeaconService.this, CHANNEL_ID);
         notifBuilder
                 .setSmallIcon(R.drawable.ic_radio)
                 //.setPriority(NotificationCompat.PRIORITY_LOW)
