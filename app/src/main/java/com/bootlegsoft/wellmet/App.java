@@ -20,14 +20,13 @@ import org.altbeacon.beacon.BeaconTransmitter;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
-import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
 import java.util.Collection;
 import java.util.UUID;
 
 
-public class App extends Application implements BootstrapNotifier, BeaconConsumer {
+public class App extends Application implements BeaconConsumer {
     private static final String TAG = "App";
 
     public static final String BEACON_LAYOUT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
@@ -42,7 +41,6 @@ public class App extends Application implements BootstrapNotifier, BeaconConsume
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     private BeaconTransmitter beaconTransmitter;
-    private boolean haveDetectedBeaconsSinceBoot = false;
 
     private static App sInstance;
 
@@ -54,14 +52,12 @@ public class App extends Application implements BootstrapNotifier, BeaconConsume
     @Override
     public void onCreate() {
         super.onCreate();
-        backgroundPowerSaver = new BackgroundPowerSaver(this);
         beaconManager = BeaconManager.getInstanceForApplication(this);
-
-        // iBeacon
+        // iBeacon parser
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
-
         BeaconParser beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
+        backgroundPowerSaver = new BackgroundPowerSaver(this);
         start();
     }
 
@@ -85,9 +81,6 @@ public class App extends Application implements BootstrapNotifier, BeaconConsume
     private void startScan() {
         Log.d(TAG, "Starting scan of beacons");
         beaconManager.bind(this);
-        Region region = new Region("backgroundRegion",
-                null, null, null);
-        regionBootstrap = new RegionBootstrap(this, region);
     }
 
     private void stopScan() {
@@ -112,41 +105,6 @@ public class App extends Application implements BootstrapNotifier, BeaconConsume
 
     private void stopAdvertise() {
         beaconTransmitter.stopAdvertising();
-    }
-
-
-    @Override
-    public void didEnterRegion(Region arg0) {
-        // In this example, this class sends a notification to the user whenever a Beacon
-        // matching a Region (defined above) are first seen.
-        Log.d(TAG, "did enter region.");
-        if (!haveDetectedBeaconsSinceBoot) {
-            Log.d(TAG, "auto launching MainActivity");
-
-            // The very first time since boot that we detect an beacon, we launch the
-            // MainActivity
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            // Important:  make sure to add android:launchMode="singleInstance" in the manifest
-            // to keep multiple copies of this activity from getting created if the user has
-            // already manually launched the app.
-            this.startActivity(intent);
-            haveDetectedBeaconsSinceBoot = true;
-        } else {
-            sendNotificationBeacon(arg0.getId1().toUuid().toString());
-        }
-
-
-    }
-
-    @Override
-    public void didExitRegion(Region region) {
-
-    }
-
-    @Override
-    public void didDetermineStateForRegion(int i, Region region) {
-
     }
 
     @Override
@@ -213,7 +171,7 @@ public class App extends Application implements BootstrapNotifier, BeaconConsume
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_radio)
-                .setContentTitle("Someone is nearby.")
+                .setContentTitle("Someone is getting too close!")
                 .setContentText(uuid)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
