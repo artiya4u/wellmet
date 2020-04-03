@@ -22,6 +22,7 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.BeaconTransmitter;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
@@ -38,12 +39,18 @@ public class IBeaconService extends Service implements BootstrapNotifier, Beacon
     public static final String ACTION_START = PREFIX + "ACTION_START";
     public static final String ACTION_STOP = PREFIX + "ACTION_STOP";
 
+    public static final String BEACON_LAYOUT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
+
+    public static final String MAJOR = String.valueOf(0xC0);
+    public static final String MINOR = String.valueOf(0x19);
+
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
 
     private BeaconManager beaconManager;
 
     private BackgroundPowerSaver backgroundPowerSaver;
+    private BeaconTransmitter beaconTransmitter;
 
     public class ServiceControl extends Binder {
     }
@@ -64,8 +71,10 @@ public class IBeaconService extends Service implements BootstrapNotifier, Beacon
         beaconManager = BeaconManager.getInstanceForApplication(this);
 
         // iBeacon
-        beaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
+
+        BeaconParser beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
+        beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
     }
 
 
@@ -79,13 +88,13 @@ public class IBeaconService extends Service implements BootstrapNotifier, Beacon
         String action = intent.getAction();
         switch (action) {
             case ACTION_START: {
-                Log.i(TAG, "Action: starting new broadcast");
+                Log.i(TAG, "Action: starting beacon service");
                 startAdvertise();
                 startScan();
                 break;
             }
             case ACTION_STOP: {
-                Log.d(TAG, "Action: stopping a broadcast");
+                Log.d(TAG, "Action: stopping beacon service");
                 stopAdvertise();
                 stopScan();
                 break;
@@ -115,11 +124,19 @@ public class IBeaconService extends Service implements BootstrapNotifier, Beacon
     }
 
     private void startAdvertise() {
+        Beacon beacon = new Beacon.Builder()
+                .setId1(getUUID().toString())
+                .setId2(MAJOR)
+                .setId3(MINOR)
+                .setManufacturer(0x004C)
+                .setTxPower(-65)
+                .build();
 
+        beaconTransmitter.startAdvertising(beacon);
     }
 
     private void stopAdvertise() {
-
+        beaconTransmitter.stopAdvertising();
     }
 
 
