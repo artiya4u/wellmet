@@ -13,7 +13,8 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
 
-    <string name="notif_message">Broadcasting your temporary ID</string>
+    <string name="notif_title">Working in background</string>
+    <string name="notif_message">Monitoring your proximity..</string>
     <string name="notif_action_stop">Stop broadcasts</string>
     <string name="notif_channel_name">Status</string>
     <string name="notif_channel_description">Status of temporary ID broadcast.</string>
