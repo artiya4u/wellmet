@@ -31,8 +31,11 @@ public class App extends Application implements BeaconConsumer {
 
     public static final String BEACON_LAYOUT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
 
-    public static final String MAJOR = String.valueOf(0xC0);
-    public static final String MINOR = String.valueOf(0x19);
+    // For identify COVID-19 beacons.
+    public static final int MAJOR = 0xC0;
+    public static final int MINOR = 0x19;
+
+    public static final float MINIMUM_DISTANCE = 2.0f;
 
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
@@ -94,8 +97,8 @@ public class App extends Application implements BeaconConsumer {
     private void startAdvertise() {
         Beacon beacon = new Beacon.Builder()
                 .setId1(getUUID().toString())
-                .setId2(MAJOR)
-                .setId3(MINOR)
+                .setId2(String.valueOf(MAJOR))
+                .setId3(String.valueOf(MINOR))
                 .setManufacturer(0x004C)
                 .setTxPower(-65)
                 .build();
@@ -119,7 +122,10 @@ public class App extends Application implements BeaconConsumer {
                                 " Major: " + b.getId2() +
                                 " Minor: " + b.getId3() +
                                 " Distance: " + b.getDistance() + " meters");
-                        sendNotificationBeacon(b.getId1().toUuid().toString());
+                        if (b.getDistance() <= MINIMUM_DISTANCE &&
+                                b.getId2().toInt() == MAJOR && b.getId3().toInt() == MINOR) {
+                            sendNotificationBeacon(b.getId1().toUuid().toString());
+                        }
                     }
                 }
             }
@@ -171,8 +177,8 @@ public class App extends Application implements BeaconConsumer {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_radio)
-                .setContentTitle("Someone is getting too close!")
-                .setContentText(uuid)
+                .setContentTitle(getString(R.string.notif_warning_title))
+                .setContentText(getString(R.string.notif_warning_description))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
