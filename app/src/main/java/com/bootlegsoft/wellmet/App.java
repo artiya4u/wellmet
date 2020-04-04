@@ -93,6 +93,7 @@ public class App extends Application implements BeaconConsumer {
     private void getMeets() {
         AppExecutors.getInstance().diskIO().execute(() -> {
             meets = db.meetDao().getAll();
+            Log.d(TAG, "Meet loaded: " + meets.size());
         });
     }
 

@@ -16,6 +16,9 @@ public interface MeetDao {
     @Query("SELECT * FROM meet WHERE meetTime BETWEEN datetime('now', '-6 days') AND datetime('now', 'localtime') ORDER BY meetTime ASC;")
     List<Meet> loadAllFromLastWeek();
 
+    @Query("SELECT COUNT(DISTINCT beaconId) FROM meet WHERE meetTime BETWEEN datetime('now', '-6 days') AND datetime('now', 'localtime');")
+    Integer countFromLastWeak();
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(Meet... meets);
 
