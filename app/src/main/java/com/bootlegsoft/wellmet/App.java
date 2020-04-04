@@ -35,7 +35,7 @@ public class App extends Application implements BeaconConsumer {
     public static final int MAJOR = 0xC0;
     public static final int MINOR = 0x19;
 
-    public static final float MINIMUM_DISTANCE = 2.0f;
+    public static final float MINIMUM_DISTANCE = 1.0f;
 
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
