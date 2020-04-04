@@ -3,15 +3,6 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_history">History</string>
     <string name="title_profile">Profile</string>
-    <string name="title_activity_login">Sign in</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
 
     <string name="notif_title">WellMet</string>
     <string name="notif_message">Proximity monitoring…</string>
@@ -20,11 +11,4 @@
     <string name="notif_action_stop">Stop broadcasts</string>
     <string name="notif_channel_name">Status</string>
     <string name="notif_channel_description">Status of temporary ID broadcast.</string>
-
-    <string name="advertise_error_already_started">Error: advertise already started</string>
-    <string name="advertise_error_data_large">Error: data too large</string>
-    <string name="advertise_error_unsupported">Error: feature unsupported</string>
-    <string name="advertise_error_internal">Error: internal problem</string>
-    <string name="advertise_error_too_many">Error: too many advertisers</string>
-    <string name="advertise_error_unknown">Error: advertise unknown error</string>
 </resources>
