@@ -7,7 +7,7 @@
     tools:context=".ui.dashboard.DashboardFragment">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/statusImage"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_marginTop="64dp"
@@ -23,10 +23,10 @@
         android:layout_height="wrap_content"
         android:text="@string/level1"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView" />
+        app:layout_constraintBottom_toBottomOf="@+id/statusImage"
+        app:layout_constraintEnd_toEndOf="@+id/statusImage"
+        app:layout_constraintStart_toStartOf="@+id/statusImage"
+        app:layout_constraintTop_toTopOf="@+id/statusImage" />
 
     <TextView
         android:id="@+id/meetCount"
@@ -35,23 +35,22 @@
         android:text="0"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/level"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintStart_toStartOf="@+id/imageView" />
+        app:layout_constraintEnd_toEndOf="@+id/statusImage"
+        app:layout_constraintStart_toStartOf="@+id/statusImage" />
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/alertSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
-        android:checked="true"
         android:thumb="@drawable/switch_thumb"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/statusImage"
         app:track="@drawable/switch_track" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/alertStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"

@@ -11,7 +11,6 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.room.Room;
 
 import com.bootlegsoft.wellmet.data.AppDatabase;
 import com.bootlegsoft.wellmet.data.AppExecutors;
@@ -38,7 +37,6 @@ import java.util.UUID;
 
 public class App extends Application implements BeaconConsumer {
     private static final String TAG = "App";
-    public static final String DB_NAME = "wellmet";
 
     public static final String BEACON_LAYOUT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
 
@@ -58,7 +56,7 @@ public class App extends Application implements BeaconConsumer {
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     private BeaconTransmitter beaconTransmitter;
-    private AppDatabase db;
+    private AppDatabase appDatabase;
     private User user;
     private List<Meet> meets;
     private HashMap<String, Long> lastAlerts = new HashMap<>();
@@ -74,14 +72,14 @@ public class App extends Application implements BeaconConsumer {
     public void onCreate() {
         super.onCreate();
         sInstance = this;
-
+        appDatabase = AppDatabase.getDatabase(this);
         beaconManager = BeaconManager.getInstanceForApplication(this);
         // iBeacon parser
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
         BeaconParser beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         backgroundPowerSaver = new BackgroundPowerSaver(this);
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, DB_NAME).build();
+
         init();
     }
 
@@ -92,7 +90,7 @@ public class App extends Application implements BeaconConsumer {
 
     private void getMeets() {
         AppExecutors.getInstance().diskIO().execute(() -> {
-            meets = db.meetDao().getAll();
+            meets = appDatabase.meetDao().getAll();
             Log.d(TAG, "Meet loaded: " + meets.size());
         });
     }
@@ -100,7 +98,7 @@ public class App extends Application implements BeaconConsumer {
 
     private void getUser() {
         AppExecutors.getInstance().diskIO().execute(() -> {
-            List<User> users = db.userDao().getAll();
+            List<User> users = appDatabase.userDao().getAll();
             if (users.size() == 0) {
                 createUser();
             } else {
@@ -116,7 +114,7 @@ public class App extends Application implements BeaconConsumer {
         newUser.phoneNumber = "6666666666"; // TODO Get this from UI
         newUser.createTime = new Date();
         newUser.enableAlert = true;
-        db.userDao().insertAll(newUser);
+        appDatabase.userDao().insertAll(newUser);
         Log.d(TAG, "Create user: " + newUser.phoneNumber);
         user = newUser;
     }
@@ -212,7 +210,7 @@ public class App extends Application implements BeaconConsumer {
                                 meet.distance = b.getDistance();
                                 meets.add(meet);
                                 AppExecutors.getInstance().diskIO().execute(() -> {
-                                    db.meetDao().insertAll(meet);
+                                    appDatabase.meetDao().insertAll(meet);
                                 });
                             }
                         }

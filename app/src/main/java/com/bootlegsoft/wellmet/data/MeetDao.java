@@ -1,5 +1,6 @@
 package com.bootlegsoft.wellmet.data;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -13,11 +14,11 @@ public interface MeetDao {
     @Query("SELECT * FROM meet")
     List<Meet> getAll();
 
-    @Query("SELECT * FROM meet WHERE meetTime BETWEEN datetime('now', '-6 days') AND datetime('now', 'localtime') ORDER BY meetTime ASC;")
-    List<Meet> loadAllFromLastWeek();
+    @Query("SELECT * FROM meet WHERE meetTime < date('now','-7 days');")
+    LiveData<List<Meet>> loadAllFromLastWeek();
 
-    @Query("SELECT COUNT(DISTINCT beaconId) FROM meet WHERE meetTime BETWEEN datetime('now', '-6 days') AND datetime('now', 'localtime');")
-    Integer countFromLastWeak();
+    @Query("SELECT COUNT(DISTINCT beaconId) FROM meet WHERE meetTime < date('now','-7 days');")
+    LiveData<Integer> countUserFromLastWeak();
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(Meet... meets);
