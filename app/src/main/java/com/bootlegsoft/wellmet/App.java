@@ -5,12 +5,18 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.lifecycle.LiveData;
+import androidx.room.Room;
+
+import com.bootlegsoft.wellmet.data.AppDatabase;
+import com.bootlegsoft.wellmet.data.User;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -23,11 +29,16 @@ import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class App extends Application implements BeaconConsumer {
     private static final String TAG = "App";
+    public static final String DB_NAME = "wellmet";
 
     public static final String BEACON_LAYOUT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
 
@@ -45,6 +56,8 @@ public class App extends Application implements BeaconConsumer {
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     private BeaconTransmitter beaconTransmitter;
+    private AppDatabase db;
+    private User user;
 
     private static App sInstance;
 
@@ -63,7 +76,35 @@ public class App extends Application implements BeaconConsumer {
         BeaconParser beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         backgroundPowerSaver = new BackgroundPowerSaver(this);
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, DB_NAME).build();
+        getUser();
         start();
+    }
+
+
+    private void getUser() {
+        LiveData<List<User>> users = db.userDao().getAll();
+        if (users.getValue() == null) {
+            createUser();
+        } else if (users.getValue().size() == 0) {
+            createUser();
+        } else {
+            user = users.getValue().get(0);
+            Log.d(TAG, "Loaded user: " + user.phoneNumber);
+        }
+    }
+
+    private void createUser() {
+        User newUser = new User();
+        newUser.phoneNumber = "6666666666"; // TODO Get this from UI
+        newUser.createTime = new Date();
+        newUser.enableAlert = true;
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(() -> {
+            db.userDao().insertAll(newUser);
+        });
+        Log.d(TAG, "Create user: " + newUser.phoneNumber);
+        user = newUser;
     }
 
 
