@@ -5,17 +5,16 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.lifecycle.LiveData;
 import androidx.room.Room;
 
 import com.bootlegsoft.wellmet.data.AppDatabase;
+import com.bootlegsoft.wellmet.data.AppExecutors;
 import com.bootlegsoft.wellmet.data.User;
 
 import org.altbeacon.beacon.Beacon;
@@ -32,8 +31,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 
 public class App extends Application implements BeaconConsumer {
@@ -70,6 +67,7 @@ public class App extends Application implements BeaconConsumer {
     public void onCreate() {
         super.onCreate();
         sInstance = this;
+
         beaconManager = BeaconManager.getInstanceForApplication(this);
         // iBeacon parser
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
@@ -83,15 +81,15 @@ public class App extends Application implements BeaconConsumer {
 
 
     private void getUser() {
-        LiveData<List<User>> users = db.userDao().getAll();
-        if (users.getValue() == null) {
-            createUser();
-        } else if (users.getValue().size() == 0) {
-            createUser();
-        } else {
-            user = users.getValue().get(0);
-            Log.d(TAG, "Loaded user: " + user.phoneNumber);
-        }
+        AppExecutors.getInstance().diskIO().execute(() -> {
+            List<User> users = db.userDao().getAll();
+            if (users.size() == 0) {
+                createUser();
+            } else {
+                user = users.get(0);
+                Log.d(TAG, "Loaded user: " + user.phoneNumber);
+            }
+        });
     }
 
     private void createUser() {
@@ -99,10 +97,7 @@ public class App extends Application implements BeaconConsumer {
         newUser.phoneNumber = "6666666666"; // TODO Get this from UI
         newUser.createTime = new Date();
         newUser.enableAlert = true;
-        Executor myExecutor = Executors.newSingleThreadExecutor();
-        myExecutor.execute(() -> {
-            db.userDao().insertAll(newUser);
-        });
+        db.userDao().insertAll(newUser);
         Log.d(TAG, "Create user: " + newUser.phoneNumber);
         user = newUser;
     }
@@ -233,6 +228,5 @@ public class App extends Application implements BeaconConsumer {
         // notificationId is a unique int for each notification that you must define
         notificationManager.notify(uuid.hashCode(), builder.build());
     }
-
 
 }

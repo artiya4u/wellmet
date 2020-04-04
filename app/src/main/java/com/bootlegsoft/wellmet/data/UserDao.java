@@ -12,7 +12,10 @@ import java.util.List;
 @Dao
 public interface UserDao {
     @Query("SELECT * FROM user;")
-    LiveData<List<User>> getAll();
+    List<User> getAll();
+
+    @Query("SELECT * FROM user;")
+    LiveData<List<User>> getLiveAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(User... users);
