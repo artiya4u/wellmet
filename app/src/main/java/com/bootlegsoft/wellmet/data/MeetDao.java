@@ -1,9 +1,9 @@
 package com.bootlegsoft.wellmet.data;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
@@ -11,12 +11,12 @@ import java.util.List;
 @Dao
 public interface MeetDao {
     @Query("SELECT * FROM meet")
-    LiveData<List<Meet>> getAll();
+    List<Meet> getAll();
 
-    @Query("SELECT * FROM meet WHERE meetTime BETWEEN datetime('now', '-6 days') AND datetime('now', 'localtime');")
-    LiveData<List<Meet>> loadAllFromLastWeek();
+    @Query("SELECT * FROM meet WHERE meetTime BETWEEN datetime('now', '-6 days') AND datetime('now', 'localtime') ORDER BY meetTime ASC;")
+    List<Meet> loadAllFromLastWeek();
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertAll(Meet... meets);
 
     @Delete

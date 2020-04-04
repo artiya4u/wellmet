@@ -15,6 +15,7 @@ import androidx.room.Room;
 
 import com.bootlegsoft.wellmet.data.AppDatabase;
 import com.bootlegsoft.wellmet.data.AppExecutors;
+import com.bootlegsoft.wellmet.data.Meet;
 import com.bootlegsoft.wellmet.data.User;
 
 import org.altbeacon.beacon.Beacon;
@@ -27,8 +28,10 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +46,8 @@ public class App extends Application implements BeaconConsumer {
     public static final int MAJOR = 0xC0;
     public static final int MINOR = 0x19;
 
+    public static final int IGNORE_PERIOD = 30 * 60 * 1000;
+
     public static final float ALERT_DISTANCE = 1.0f;
     public static final float MONITORING_DISTANCE = 2.0f;
 
@@ -55,6 +60,8 @@ public class App extends Application implements BeaconConsumer {
     private BeaconTransmitter beaconTransmitter;
     private AppDatabase db;
     private User user;
+    private List<Meet> meets;
+    private HashMap<String, Long> lastAlerts = new HashMap<>();
 
     private static App sInstance;
 
@@ -75,8 +82,18 @@ public class App extends Application implements BeaconConsumer {
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         backgroundPowerSaver = new BackgroundPowerSaver(this);
         db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, DB_NAME).build();
+        init();
+    }
+
+    private void init() {
         getUser();
-        start();
+        getMeets();
+    }
+
+    private void getMeets() {
+        AppExecutors.getInstance().diskIO().execute(() -> {
+            meets = db.meetDao().getAll();
+        });
     }
 
 
@@ -89,6 +106,7 @@ public class App extends Application implements BeaconConsumer {
                 user = users.get(0);
                 Log.d(TAG, "Loaded user: " + user.phoneNumber);
             }
+            start();
         });
     }
 
@@ -103,8 +121,17 @@ public class App extends Application implements BeaconConsumer {
     }
 
 
-    public static UUID getUUID() {
-        return UUID.randomUUID(); // TODO Generate UUID from user phone number and hashing with date.
+    public UUID getUUID() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date desiredDate = cal.getTime();
+
+        // TODO encrypt this
+        return new UUID(Long.parseLong(user.phoneNumber), desiredDate.getTime());
     }
 
 
@@ -160,12 +187,32 @@ public class App extends Application implements BeaconConsumer {
                                 " Major: " + b.getId2() +
                                 " Minor: " + b.getId3() +
                                 " Distance: " + b.getDistance() + " meters");
+                        // Is WellMet beacon
                         if (b.getId2().toInt() == MAJOR && b.getId3().toInt() == MINOR) {
-                            if (b.getDistance() <= ALERT_DISTANCE) {
-                                sendNotificationBeacon(b.getId1().toUuid().toString());
+                            String beaconId = b.getId1().toString();
+                            Long lastAlert = lastAlerts.get(beaconId);
+                            Date currentTime = new Date();
+
+                            // Check last alert of a beacon.
+                            if (lastAlert != null) {
+                                // Prevent alert too often.
+                                if (currentTime.getTime() - lastAlert < IGNORE_PERIOD) {
+                                    return;
+                                }
+                            }
+                            if (b.getDistance() <= ALERT_DISTANCE && user.enableAlert) {
+                                sendNotificationBeacon(beaconId);
                             }
                             if (b.getDistance() <= MONITORING_DISTANCE) {
-                                // TODO Keep the record.
+                                App.this.lastAlerts.put(beaconId, currentTime.getTime());
+                                Meet meet = new Meet();
+                                meet.beaconId = beaconId;
+                                meet.meetTime = currentTime;
+                                meet.distance = b.getDistance();
+                                meets.add(meet);
+                                AppExecutors.getInstance().diskIO().execute(() -> {
+                                    db.meetDao().insertAll(meet);
+                                });
                             }
                         }
                     }

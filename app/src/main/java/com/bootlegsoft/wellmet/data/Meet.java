@@ -19,6 +19,9 @@ public class Meet {
     @ColumnInfo(name = "meetTime")
     public Date meetTime;
 
+    @ColumnInfo(name = "distance")
+    public double distance;
+
     @ColumnInfo(name = "longitude")
     public double longitude;
 
