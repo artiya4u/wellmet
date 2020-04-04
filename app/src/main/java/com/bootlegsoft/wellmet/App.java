@@ -202,10 +202,10 @@ public class App extends Application implements BeaconConsumer {
                                 }
                             }
                             if (b.getDistance() <= ALERT_DISTANCE && user.enableAlert) {
+                                App.this.lastAlerts.put(beaconId, currentTime.getTime());
                                 sendNotificationBeacon(beaconId);
                             }
                             if (b.getDistance() <= MONITORING_DISTANCE) {
-                                App.this.lastAlerts.put(beaconId, currentTime.getTime());
                                 Meet meet = new Meet();
                                 meet.beaconId = beaconId;
                                 meet.meetTime = currentTime;
