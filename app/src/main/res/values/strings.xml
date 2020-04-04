@@ -5,10 +5,16 @@
     <string name="title_profile">Profile</string>
 
     <string name="notif_title">WellMet</string>
-    <string name="notif_message">Proximity monitoring…</string>
+    <string name="notif_message">Working in background…</string>
     <string name="notif_warning_title">Someone is getting too close!</string>
     <string name="notif_warning_description">Keeping your distance to stay safe.</string>
     <string name="notif_action_stop">Stop broadcasts</string>
     <string name="notif_channel_name">Status</string>
     <string name="notif_channel_description">Status of temporary ID broadcast.</string>
+    <string name="level1">Good</string>
+    <string name="level2">Moderate</string>
+    <string name="level3">Unhealthy</string>
+    <string name="level4">Very Unhealthy</string>
+    <string name="alert_enabled">Proximity alert enabled</string>
+    <string name="alert_disabled">Proximity alert disabled</string>
 </resources>
