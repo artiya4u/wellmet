@@ -15,12 +15,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.bootlegsoft.wellmet.R;
-import com.bootlegsoft.wellmet.data.AppDatabase;
 import com.bootlegsoft.wellmet.data.User;
+
+import java.text.DecimalFormat;
 
 public class DashboardFragment extends Fragment {
 
     private static final String TAG = "DashboardFragment";
+
+    private static final DecimalFormat formatter = new DecimalFormat("#,###,###");
 
     private DashboardViewModel dashboardViewModel;
     private User user;
@@ -59,9 +62,7 @@ public class DashboardFragment extends Fragment {
         dashboardViewModel.getUserCount().observe(getViewLifecycleOwner(), count -> {
             Log.d(TAG, "Meets:" + count);
             Level level = getLevel(count);
-            textViewMeetCount.setTextColor(level.textColor);
-            textViewMeetCount.setText(String.valueOf(count));
-            textViewLevel.setTextColor(level.textColor);
+            textViewMeetCount.setText(formatter.format(count));
             textViewLevel.setText(level.text);
             statusImage.setImageResource(level.image);
         });
@@ -69,13 +70,13 @@ public class DashboardFragment extends Fragment {
         return root;
     }
 
-    private class Level {
-        public String text;
-        public int textColor;
-        public int image;
+    private static class Level {
+        String text;
+        int textColor;
+        int image;
     }
 
-    public Level getLevel(int userCount) {
+    private Level getLevel(int userCount) {
         Level level = new Level();
         level.text = "-";
 
