@@ -58,10 +58,11 @@ public class DashboardFragment extends Fragment {
 
         dashboardViewModel.getUserCount().observe(getViewLifecycleOwner(), count -> {
             Log.d(TAG, "Meets:" + count);
-            textViewMeetCount.setText(String.valueOf(count));
             Level level = getLevel(count);
-            textViewLevel.setText(level.text);
+            textViewMeetCount.setTextColor(level.textColor);
+            textViewMeetCount.setText(String.valueOf(count));
             textViewLevel.setTextColor(level.textColor);
+            textViewLevel.setText(level.text);
             statusImage.setImageResource(level.image);
         });
 
@@ -90,7 +91,7 @@ public class DashboardFragment extends Fragment {
             level.text = getString(R.string.level3);
             level.textColor = R.color.colorLevel3;
             level.image = R.drawable.ic_level3;
-        } else if (userCount <= 500) {
+        } else {
             level.text = getString(R.string.level4);
             level.textColor = R.color.colorLevel4;
             level.image = R.drawable.ic_level4;
