@@ -35,7 +35,8 @@ public class App extends Application implements BeaconConsumer {
     public static final int MAJOR = 0xC0;
     public static final int MINOR = 0x19;
 
-    public static final float MINIMUM_DISTANCE = 1.0f;
+    public static final float ALERT_DISTANCE = 1.0f;
+    public static final float MONITORING_DISTANCE = 2.0f;
 
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
@@ -55,6 +56,7 @@ public class App extends Application implements BeaconConsumer {
     @Override
     public void onCreate() {
         super.onCreate();
+        sInstance = this;
         beaconManager = BeaconManager.getInstanceForApplication(this);
         // iBeacon parser
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
@@ -122,9 +124,13 @@ public class App extends Application implements BeaconConsumer {
                                 " Major: " + b.getId2() +
                                 " Minor: " + b.getId3() +
                                 " Distance: " + b.getDistance() + " meters");
-                        if (b.getDistance() <= MINIMUM_DISTANCE &&
-                                b.getId2().toInt() == MAJOR && b.getId3().toInt() == MINOR) {
-                            sendNotificationBeacon(b.getId1().toUuid().toString());
+                        if (b.getId2().toInt() == MAJOR && b.getId3().toInt() == MINOR) {
+                            if (b.getDistance() <= ALERT_DISTANCE) {
+                                sendNotificationBeacon(b.getId1().toUuid().toString());
+                            }
+                            if (b.getDistance() <= MONITORING_DISTANCE) {
+                                // TODO Keep the record.
+                            }
                         }
                     }
                 }
