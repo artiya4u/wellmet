@@ -14,11 +14,13 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.bootlegsoft.wellmet.data.AppDatabase;
 import com.bootlegsoft.wellmet.data.AppExecutors;
 import com.bootlegsoft.wellmet.data.Meet;
 import com.bootlegsoft.wellmet.data.User;
+import com.bootlegsoft.wellmet.ui.AppViewModel;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -59,14 +61,13 @@ public class App extends Application implements BeaconConsumer {
     private BeaconManager beaconManager;
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
+    BeaconParser beaconParser;
     private BeaconTransmitter beaconTransmitter;
-    private Location currentBestLocation = null;
     private LocationManager locationManager = null;
 
 
     private AppDatabase appDatabase;
     private User user;
-    private List<Meet> meets;
     private HashMap<String, Long> lastAlerts = new HashMap<>();
 
     private static App sInstance;
@@ -84,11 +85,10 @@ public class App extends Application implements BeaconConsumer {
         beaconManager = BeaconManager.getInstanceForApplication(this);
         // iBeacon parser
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
-        BeaconParser beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
-        beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
+        beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
         backgroundPowerSaver = new BackgroundPowerSaver(this);
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
-        init();
+        updateNotification();
     }
 
     /**
@@ -118,40 +118,19 @@ public class App extends Application implements BeaconConsumer {
         }
     }
 
-    private void init() {
-        getUser();
-        getMeets();
-    }
-
-    private void getMeets() {
-        AppExecutors.getInstance().diskIO().execute(() -> {
-            meets = appDatabase.meetDao().getAll();
-            Log.d(TAG, "Meet loaded: " + meets.size());
-        });
-    }
-
 
     private void getUser() {
         AppExecutors.getInstance().diskIO().execute(() -> {
             List<User> users = appDatabase.userDao().getAll();
             if (users.size() == 0) {
-                createUser();
+                Log.d(TAG, "No user found!");
             } else {
                 user = users.get(0);
                 Log.d(TAG, "Loaded user: " + user.phoneNumber);
+                startScan();
+                startAdvertise();
             }
-            start();
         });
-    }
-
-    private void createUser() {
-        User newUser = new User();
-        newUser.phoneNumber = "6666666666"; // TODO Get this from UI
-        newUser.createTime = new Date();
-        newUser.enableAlert = true;
-        appDatabase.userDao().insertAll(newUser);
-        Log.d(TAG, "Create user: " + newUser.phoneNumber);
-        user = newUser;
     }
 
 
@@ -170,9 +149,7 @@ public class App extends Application implements BeaconConsumer {
 
 
     public void start() {
-        updateNotification();
-        startScan();
-        startAdvertise();
+        getUser();
     }
 
     public void stop() {
@@ -194,6 +171,7 @@ public class App extends Application implements BeaconConsumer {
     }
 
     private void startAdvertise() {
+        beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         Beacon beacon = new Beacon.Builder()
                 .setId1(getUUID().toString())
                 .setId2(String.valueOf(MAJOR))
@@ -238,14 +216,15 @@ public class App extends Application implements BeaconConsumer {
                             sendNotificationBeacon(beaconId);
                         }
                         if (b.getDistance() <= MONITORING_DISTANCE) {
-                            Location lastBestLocation = getLastBestLocation();
                             Meet meet = new Meet();
                             meet.beaconId = beaconId;
                             meet.meetTime = currentTime;
                             meet.distance = b.getDistance();
+
+                            Location lastBestLocation = getLastBestLocation();
                             meet.latitude = lastBestLocation.getLatitude();
                             meet.longitude = lastBestLocation.getLongitude();
-                            meets.add(meet);
+
                             AppExecutors.getInstance().diskIO().execute(() -> {
                                 appDatabase.meetDao().insertAll(meet);
                             });

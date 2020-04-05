@@ -8,7 +8,6 @@
     <string name="notif_message">Working in background…</string>
     <string name="notif_warning_title">Someone is getting too close!</string>
     <string name="notif_warning_description">Keeping your distance to stay safe.</string>
-    <string name="notif_action_stop">Stop broadcasts</string>
     <string name="notif_channel_name">Status</string>
     <string name="notif_channel_description">Status of temporary ID broadcast.</string>
     <string name="level1">Good</string>
@@ -17,4 +16,12 @@
     <string name="level4">Very Unhealthy</string>
     <string name="alert_enabled">Proximity alert enabled</string>
     <string name="alert_disabled">Proximity alert disabled</string>
+    <string name="phone_use_description">For identification only, no SMS confirmation</string>
+    <string name="ok">OK</string>
+    <string name="signup_title">Your Phone Number</string>
+
+    <string name="bluetooth_not_enable_title">Bluetooth not enabled</string>
+    <string name="bluetooth_not_enable_msg">Please enable bluetooth in settings and restart this application.</string>
+    <string name="bluetooth_le_not_available_title">Bluetooth LE not available</string>
+    <string name="bluetooth_le_not_available_msg">Sorry, this device does not support Bluetooth LE.</string>
 </resources>
