@@ -1,10 +1,13 @@
 package com.bootlegsoft.wellmet;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
@@ -22,6 +25,7 @@ import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.BeaconTransmitter;
+import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
@@ -56,6 +60,10 @@ public class App extends Application implements BeaconConsumer {
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     private BeaconTransmitter beaconTransmitter;
+    private Location currentBestLocation = null;
+    private LocationManager locationManager = null;
+
+
     private AppDatabase appDatabase;
     private User user;
     private List<Meet> meets;
@@ -79,8 +87,35 @@ public class App extends Application implements BeaconConsumer {
         BeaconParser beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         backgroundPowerSaver = new BackgroundPowerSaver(this);
-
+        locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         init();
+    }
+
+    /**
+     * @return the last know best location
+     */
+    private Location getLastBestLocation() {
+        @SuppressLint("MissingPermission")
+        Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        @SuppressLint("MissingPermission")
+        Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+        long GPSLocationTime = 0;
+        if (null != locationGPS) {
+            GPSLocationTime = locationGPS.getTime();
+        }
+
+        long NetLocationTime = 0;
+
+        if (null != locationNet) {
+            NetLocationTime = locationNet.getTime();
+        }
+
+        if (0 < GPSLocationTime - NetLocationTime) {
+            return locationGPS;
+        } else {
+            return locationNet;
+        }
     }
 
     private void init() {
@@ -186,33 +221,34 @@ public class App extends Application implements BeaconConsumer {
                                 " Major: " + b.getId2() +
                                 " Minor: " + b.getId3() +
                                 " Distance: " + b.getDistance() + " meters");
-                        // Is WellMet beacon
-                        if (b.getId2().toInt() == MAJOR && b.getId3().toInt() == MINOR) {
-                            String beaconId = b.getId1().toString();
-                            Long lastAlert = lastAlerts.get(beaconId);
-                            Date currentTime = new Date();
 
-                            // Check last alert of a beacon.
-                            if (lastAlert != null) {
-                                // Prevent alert too often.
-                                if (currentTime.getTime() - lastAlert < IGNORE_PERIOD) {
-                                    return;
-                                }
+                        String beaconId = b.getId1().toString();
+                        Long lastAlert = lastAlerts.get(beaconId);
+                        Date currentTime = new Date();
+
+                        // Check last alert of a beacon.
+                        if (lastAlert != null) {
+                            // Prevent alert too often.
+                            if (currentTime.getTime() - lastAlert < IGNORE_PERIOD) {
+                                return;
                             }
-                            if (b.getDistance() <= ALERT_DISTANCE && user.enableAlert) {
-                                App.this.lastAlerts.put(beaconId, currentTime.getTime());
-                                sendNotificationBeacon(beaconId);
-                            }
-                            if (b.getDistance() <= MONITORING_DISTANCE) {
-                                Meet meet = new Meet();
-                                meet.beaconId = beaconId;
-                                meet.meetTime = currentTime;
-                                meet.distance = b.getDistance();
-                                meets.add(meet);
-                                AppExecutors.getInstance().diskIO().execute(() -> {
-                                    appDatabase.meetDao().insertAll(meet);
-                                });
-                            }
+                        }
+                        if (b.getDistance() <= ALERT_DISTANCE && user.enableAlert) {
+                            App.this.lastAlerts.put(beaconId, currentTime.getTime());
+                            sendNotificationBeacon(beaconId);
+                        }
+                        if (b.getDistance() <= MONITORING_DISTANCE) {
+                            Location lastBestLocation = getLastBestLocation();
+                            Meet meet = new Meet();
+                            meet.beaconId = beaconId;
+                            meet.meetTime = currentTime;
+                            meet.distance = b.getDistance();
+                            meet.latitude = lastBestLocation.getLatitude();
+                            meet.longitude = lastBestLocation.getLongitude();
+                            meets.add(meet);
+                            AppExecutors.getInstance().diskIO().execute(() -> {
+                                appDatabase.meetDao().insertAll(meet);
+                            });
                         }
                     }
                 }
@@ -220,7 +256,7 @@ public class App extends Application implements BeaconConsumer {
         });
 
         try {
-            beaconManager.startRangingBeaconsInRegion(new Region("com.bootlegsoft.wellmet.rangingRegion", null, null, null));
+            beaconManager.startRangingBeaconsInRegion(new Region("com.bootlegsoft.wellmet.rangingRegion", null, Identifier.fromInt(MAJOR), Identifier.fromInt(MINOR)));
         } catch (RemoteException e) {
         }
     }
