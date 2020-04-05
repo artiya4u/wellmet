@@ -24,4 +24,5 @@
     <string name="bluetooth_not_enable_msg">Please enable bluetooth in settings and restart this application.</string>
     <string name="bluetooth_le_not_available_title">Bluetooth LE not available</string>
     <string name="bluetooth_le_not_available_msg">Sorry, this device does not support Bluetooth LE.</string>
+    <string name="invalid_phone_number">Your phone number is too short</string>
 </resources>

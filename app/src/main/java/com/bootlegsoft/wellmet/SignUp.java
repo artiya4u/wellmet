@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.bootlegsoft.wellmet.data.AppDatabase;
 import com.bootlegsoft.wellmet.data.AppExecutors;
@@ -59,16 +60,20 @@ public class SignUp extends AppCompatActivity {
                             phoneNumberOnly = phoneNumberOnly.replace("+", "");
                             phoneNumberOnly = phoneNumberOnly.replace("(", "");
                             phoneNumberOnly = phoneNumberOnly.replace(")", "");
-                            User newUser = new User();
-                            newUser.phoneNumber = phoneNumberOnly;
-                            newUser.createTime = new Date();
-                            newUser.enableAlert = true;
-                            appDatabase.userDao().insertAll(newUser);
-                            Log.d(TAG, "Create user: " + newUser.phoneNumber);
+                            if (phoneNumberOnly.length() > 8) {
+                                User newUser = new User();
+                                newUser.phoneNumber = phoneNumberOnly;
+                                newUser.createTime = new Date();
+                                newUser.enableAlert = true;
+                                appDatabase.userDao().insertAll(newUser);
+                                Log.d(TAG, "Create user: " + newUser.phoneNumber);
+                                // Go to main activity.
+                                Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                                startActivity(intent);
+                            } else {
+                                showError();
+                            }
                         });
-                        // Go to main activity.
-                        Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                        startActivity(intent);
                     }
                 });
             } else {
@@ -76,6 +81,14 @@ public class SignUp extends AppCompatActivity {
                 // Go to main activity.
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+            }
+        });
+    }
+
+    private void showError() {
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getApplicationContext(), getString(R.string.invalid_phone_number), Toast.LENGTH_SHORT).show();
             }
         });
     }
