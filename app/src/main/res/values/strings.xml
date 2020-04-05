@@ -9,7 +9,9 @@
     <string name="notif_warning_title">Someone is getting too close!</string>
     <string name="notif_warning_description">Keeping your distance to stay safe.</string>
     <string name="notif_channel_name">Status</string>
-    <string name="notif_channel_description">Status of temporary ID broadcast.</string>
+    <string name="notif_channel_description">Status of background work.</string>
+    <string name="notif_alert_channel_name">Alert</string>
+    <string name="notif_alert_channel_description">Alert when someone getting too close</string>
     <string name="level1">Good</string>
     <string name="level2">Moderate</string>
     <string name="level3">Unhealthy</string>

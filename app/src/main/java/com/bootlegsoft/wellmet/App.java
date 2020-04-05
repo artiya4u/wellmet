@@ -57,6 +57,7 @@ public class App extends Application implements BeaconConsumer {
 
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
+    public static final String ALERT_CHANNEL_ID = "alert";
 
     private BeaconManager beaconManager;
     private RegionBootstrap regionBootstrap;
@@ -242,12 +243,25 @@ public class App extends Application implements BeaconConsumer {
 
     private void updateNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Channel creation
+            // Alert Channel
+            final CharSequence name = getString(R.string.notif_alert_channel_name);
+            final String description = getString(R.string.notif_alert_channel_description);
+            final int importance = NotificationManager.IMPORTANCE_HIGH;
+            final NotificationChannel channel = new NotificationChannel(ALERT_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            channel.enableVibration(true);
+            final NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Status channel
             final CharSequence name = getString(R.string.notif_channel_name);
             final String description = getString(R.string.notif_channel_description);
             final int importance = NotificationManager.IMPORTANCE_LOW;
             final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
+            channel.setVibrationPattern(new long[] { 1000 });
             final NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
@@ -278,10 +292,11 @@ public class App extends Application implements BeaconConsumer {
 
     public void sendNotificationBeacon(String uuid) {
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ALERT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_radio)
                 .setContentTitle(getString(R.string.notif_warning_title))
                 .setContentText(getString(R.string.notif_warning_description))
+                .setVibrate(new long[] { 1000 })
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
