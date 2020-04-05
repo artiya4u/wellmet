@@ -70,6 +70,7 @@ public class SignUp extends AppCompatActivity {
                                 // Go to main activity.
                                 Intent intent = new Intent(getBaseContext(), MainActivity.class);
                                 startActivity(intent);
+                                SignUp.this.finish();
                             } else {
                                 showError();
                             }
