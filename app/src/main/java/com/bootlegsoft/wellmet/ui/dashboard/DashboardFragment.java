@@ -49,13 +49,15 @@ public class DashboardFragment extends Fragment {
         });
 
         dashboardViewModel.getUser().observe(getViewLifecycleOwner(), updateUser -> {
-            Log.d(TAG, "Alert enable:" + updateUser.enableAlert);
-            user = updateUser;
-            alertSwitch.setChecked(updateUser.enableAlert);
-            if (updateUser.enableAlert) {
-                textViewAlertStatus.setText(getString(R.string.alert_enabled));
-            } else {
-                textViewAlertStatus.setText(getString(R.string.alert_disabled));
+            if (updateUser != null) {
+                Log.d(TAG, "Alert enable:" + updateUser.enableAlert);
+                user = updateUser;
+                alertSwitch.setChecked(updateUser.enableAlert);
+                if (updateUser.enableAlert) {
+                    textViewAlertStatus.setText(getString(R.string.alert_enabled));
+                } else {
+                    textViewAlertStatus.setText(getString(R.string.alert_disabled));
+                }
             }
         });
 
