@@ -1,6 +1,7 @@
 package com.bootlegsoft.wellmet;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -14,13 +15,11 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.lifecycle.ViewModelProviders;
 
 import com.bootlegsoft.wellmet.data.AppDatabase;
 import com.bootlegsoft.wellmet.data.AppExecutors;
 import com.bootlegsoft.wellmet.data.Meet;
 import com.bootlegsoft.wellmet.data.User;
-import com.bootlegsoft.wellmet.ui.AppViewModel;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -33,6 +32,7 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +57,7 @@ public class App extends Application implements BeaconConsumer {
     public static final int NOTIFICATION_ID = 1;
     public static final String CHANNEL_ID = "status";
     public static final String ALERT_CHANNEL_ID = "alert";
+    public static final long MILLIS_PER_DAY = 86400 * 1000;
 
     private BeaconManager beaconManager;
     private RegionBootstrap regionBootstrap;
@@ -64,7 +65,7 @@ public class App extends Application implements BeaconConsumer {
     BeaconParser beaconParser;
     private BeaconTransmitter beaconTransmitter;
     private LocationManager locationManager = null;
-
+    private AlarmManager alarmManager;
 
     private AppDatabase appDatabase;
     private User user;
@@ -81,6 +82,7 @@ public class App extends Application implements BeaconConsumer {
     public void onCreate() {
         super.onCreate();
         sInstance = this;
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         appDatabase = AppDatabase.getDatabase(this);
         beaconManager = BeaconManager.getInstanceForApplication(this);
         // iBeacon parser
@@ -135,10 +137,7 @@ public class App extends Application implements BeaconConsumer {
 
 
     public UUID getUUID() {
-        final long secondsPerDay = 86400;
-        final long millisPerDay = secondsPerDay * 1000;
-        long todayStart = (new Date().getTime() / millisPerDay) * millisPerDay;
-        Log.d(TAG, "todayStart: " + todayStart);
+        long todayStart = (new Date().getTime() / MILLIS_PER_DAY) * MILLIS_PER_DAY;
         return Utils.genBeaconUUID(user.wellKey(), new Date(todayStart));
     }
 
@@ -165,10 +164,18 @@ public class App extends Application implements BeaconConsumer {
         }
     }
 
-    private void startAdvertise() {
-        beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
+    public void startAdvertise() {
+        Log.d(TAG, "Starting Advertising");
+        if (beaconTransmitter == null) {
+            beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
+        } else {
+            beaconTransmitter.stopAdvertising();
+        }
+
+        UUID uuid = getUUID();
+        Log.d(TAG, "UUID: " + uuid.toString());
         Beacon beacon = new Beacon.Builder()
-                .setId1(getUUID().toString())
+                .setId1(uuid.toString())
                 .setId2(String.valueOf(MAJOR))
                 .setId3(String.valueOf(MINOR))
                 .setManufacturer(0x004C)
@@ -176,6 +183,9 @@ public class App extends Application implements BeaconConsumer {
                 .build();
 
         beaconTransmitter.startAdvertising(beacon);
+        Intent intent = new Intent(getApplicationContext(), RestartBeaconReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,  AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
     }
 
     private void stopAdvertise() {
