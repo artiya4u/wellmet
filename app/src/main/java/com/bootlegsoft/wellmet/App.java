@@ -1,7 +1,6 @@
 package com.bootlegsoft.wellmet;
 
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,6 +9,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -32,7 +32,6 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,6 +49,7 @@ public class App extends Application implements BeaconConsumer {
     public static final int MINOR = 0x19;
 
     public static final int IGNORE_PERIOD = 30 * 60 * 1000;
+    public static final int RESTART_BEACON_INTERVAL = 15 * 60 * 1000;
 
     public static final float ALERT_DISTANCE = 1.0f;
     public static final float MONITORING_DISTANCE = 2.0f;
@@ -65,7 +65,6 @@ public class App extends Application implements BeaconConsumer {
     BeaconParser beaconParser;
     private BeaconTransmitter beaconTransmitter;
     private LocationManager locationManager = null;
-    private AlarmManager alarmManager;
 
     private AppDatabase appDatabase;
     private User user;
@@ -77,12 +76,12 @@ public class App extends Application implements BeaconConsumer {
         return sInstance;
     }
 
+    Handler handler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         sInstance = this;
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         appDatabase = AppDatabase.getDatabase(this);
         beaconManager = BeaconManager.getInstanceForApplication(this);
         // iBeacon parser
@@ -91,6 +90,7 @@ public class App extends Application implements BeaconConsumer {
         backgroundPowerSaver = new BackgroundPowerSaver(this);
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         updateNotification();
+        handler = new Handler();
     }
 
     /**
@@ -183,9 +183,13 @@ public class App extends Application implements BeaconConsumer {
                 .build();
 
         beaconTransmitter.startAdvertising(beacon);
-        Intent intent = new Intent(getApplicationContext(), RestartBeaconReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,  AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startAdvertise();
+            }
+        }, RESTART_BEACON_INTERVAL);
     }
 
     private void stopAdvertise() {
