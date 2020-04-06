@@ -42,8 +42,10 @@ public class DashboardFragment extends Fragment {
         alertSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (user != null) {
-                    user.enableAlert = isChecked;
-                    dashboardViewModel.updateUser(user);
+                    if (user.enableAlert != isChecked) { // Only update when value change.
+                        user.enableAlert = isChecked;
+                        dashboardViewModel.updateUser(user);
+                    }
                 }
             }
         });
@@ -62,7 +64,6 @@ public class DashboardFragment extends Fragment {
         });
 
         dashboardViewModel.getUserCount().observe(getViewLifecycleOwner(), count -> {
-            Log.d(TAG, "Meets:" + count);
             Level level = getLevel(count);
             textViewMeetCount.setText(formatter.format(count));
             textViewLevel.setText(level.text);

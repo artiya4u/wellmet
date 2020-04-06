@@ -21,7 +21,7 @@ public class DashboardViewModel extends AndroidViewModel {
         super(application);
         appDatabase = AppDatabase.getDatabase(this.getApplication());
 
-        user = appDatabase.userDao().getUser();
+        user = appDatabase.userDao().getLiveUser();
         userCount = appDatabase.meetDao().countUserFromLastWeak();
     }
 

@@ -35,7 +35,6 @@ import org.altbeacon.beacon.startup.RegionBootstrap;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -120,14 +119,17 @@ public class App extends Application implements BeaconConsumer {
         }
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    private void getUser() {
+
+    private void startWithUser() {
         AppExecutors.getInstance().diskIO().execute(() -> {
-            List<User> users = appDatabase.userDao().getAll();
-            if (users.size() == 0) {
+            User user = appDatabase.userDao().getUser();
+            if (user == null) {
                 Log.d(TAG, "No user found!");
             } else {
-                user = users.get(0);
                 Log.d(TAG, "Loaded user: " + user.phoneNumber);
                 startScan();
                 startAdvertise();
@@ -143,7 +145,9 @@ public class App extends Application implements BeaconConsumer {
 
 
     public void start() {
-        getUser();
+        if (user == null) {
+            startWithUser();
+        }
     }
 
     public void stop() {

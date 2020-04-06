@@ -3,17 +3,17 @@ package com.bootlegsoft.wellmet;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.bootlegsoft.wellmet.data.AppDatabase;
-import com.bootlegsoft.wellmet.data.User;
-import com.bootlegsoft.wellmet.ui.AppViewModel;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import com.bootlegsoft.wellmet.data.AppDatabase;
+import com.bootlegsoft.wellmet.data.User;
+import com.bootlegsoft.wellmet.ui.AppViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             } else {
                 App.getInstance().start();
+                App.getInstance().setUser(updateUser);
             }
         });
     }
