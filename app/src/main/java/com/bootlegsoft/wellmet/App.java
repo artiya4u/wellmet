@@ -33,7 +33,6 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -136,16 +135,11 @@ public class App extends Application implements BeaconConsumer {
 
 
     public UUID getUUID() {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date desiredDate = cal.getTime();
-
-        // TODO encrypt this
-        return new UUID(Long.parseLong(user.phoneNumber), desiredDate.getTime());
+        final long secondsPerDay = 86400;
+        final long millisPerDay = secondsPerDay * 1000;
+        long todayStart = (new Date().getTime() / millisPerDay) * millisPerDay;
+        Log.d(TAG, "todayStart: " + todayStart);
+        return Utils.genBeaconUUID(user.wellKey(), new Date(todayStart));
     }
 
 
@@ -261,7 +255,7 @@ public class App extends Application implements BeaconConsumer {
             final int importance = NotificationManager.IMPORTANCE_LOW;
             final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
-            channel.setVibrationPattern(new long[] { 1000 });
+            channel.setVibrationPattern(new long[]{1000});
             final NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
@@ -296,7 +290,7 @@ public class App extends Application implements BeaconConsumer {
                 .setSmallIcon(R.drawable.ic_radio)
                 .setContentTitle(getString(R.string.notif_warning_title))
                 .setContentText(getString(R.string.notif_warning_description))
-                .setVibrate(new long[] { 1000 })
+                .setVibrate(new long[]{1000})
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
