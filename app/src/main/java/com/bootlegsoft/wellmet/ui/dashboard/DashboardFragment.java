@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -39,13 +40,19 @@ public class DashboardFragment extends Fragment {
         final TextView textViewAlertStatus = root.findViewById(R.id.alertStatus);
         final ImageView statusImage = root.findViewById(R.id.statusImage);
 
+        statusImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment dialog = new LevelDescriptionDialogFragment();
+                dialog.show(DashboardFragment.this.getParentFragmentManager(), "LevelDescriptionDialogFragment");
+            }
+        });
+
         alertSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (user != null) {
-                    if (user.enableAlert != isChecked) { // Only update when value change.
-                        user.enableAlert = isChecked;
-                        dashboardViewModel.updateUser(user);
-                    }
+                    user.enableAlert = isChecked;
+                    dashboardViewModel.updateUser(user);
                 }
             }
         });
@@ -64,6 +71,7 @@ public class DashboardFragment extends Fragment {
         });
 
         dashboardViewModel.getUserCount().observe(getViewLifecycleOwner(), count -> {
+            Log.d(TAG, "Meets:" + count);
             Level level = getLevel(count);
             textViewMeetCount.setText(formatter.format(count));
             textViewLevel.setText(level.text);

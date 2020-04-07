@@ -27,4 +27,18 @@
     <string name="bluetooth_le_not_available_title">Bluetooth LE not available</string>
     <string name="bluetooth_le_not_available_msg">Sorry, this device does not support Bluetooth LE.</string>
     <string name="invalid_phone_number">Your phone number is too short</string>
+    <string name="guide_title">Social Distance Guide</string>
+    <string name="guide_description">MellMet close contact number is the man-day per week. It means the same person can be count twice if you get close in 2 days in a week to provide data anonymity and still provide a meaningful number. This guide does not conform to any standard.</string>
+
+    <string name="title_level1">0 – 50 Good</string>
+    <string name="description_level1">Little or no risk, stay at home is still recommended.</string>
+
+    <string name="title_level2">51 – 100 Moderate</string>
+    <string name="description_level2">Medium contact, should avoid close contact and wear a mask in work or public place.</string>
+
+    <string name="title_level3">101 – 300 Unhealthy</string>
+    <string name="description_level3">Increased likelihood of exposure, should wear a mask all the time. Seek a doctor when found yourself any symptom.</string>
+
+    <string name="title_level4">> 300 Very Unhealthy</string>
+    <string name="description_level4">The highest chance of exposure should wear a respirator mask when close contact with others. An examination is highly recommended.</string>
 </resources>

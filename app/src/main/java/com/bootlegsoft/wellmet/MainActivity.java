@@ -10,17 +10,13 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.bootlegsoft.wellmet.data.AppDatabase;
-import com.bootlegsoft.wellmet.data.User;
 import com.bootlegsoft.wellmet.ui.AppViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    private AppDatabase appDatabase;
     private AppViewModel appViewModel;
-    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +31,10 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-        appDatabase = AppDatabase.getDatabase(this);
         appViewModel = ViewModelProviders.of(this).get(AppViewModel.class);
         appViewModel.getUser().observe(this, updateUser -> {
             if (updateUser == null) {
-                Intent intent = new Intent(this, SignUp.class);
+                Intent intent = new Intent(this, SignUpActivity.class);
                 startActivity(intent);
             } else {
                 App.getInstance().start();

@@ -1,8 +1,5 @@
 package com.bootlegsoft.wellmet;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -18,6 +15,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
+
 import com.bootlegsoft.wellmet.data.AppDatabase;
 import com.bootlegsoft.wellmet.data.AppExecutors;
 import com.bootlegsoft.wellmet.data.User;
@@ -27,7 +27,7 @@ import org.altbeacon.beacon.BeaconManager;
 
 import java.util.Date;
 
-public class SignUp extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
     private static final String TAG = "SignUp";
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
@@ -70,7 +70,7 @@ public class SignUp extends AppCompatActivity {
                                 // Go to main activity.
                                 Intent intent = new Intent(getBaseContext(), MainActivity.class);
                                 startActivity(intent);
-                                SignUp.this.finish();
+                                SignUpActivity.this.finish();
                             } else {
                                 showError();
                             }
@@ -82,7 +82,7 @@ public class SignUp extends AppCompatActivity {
                 // Go to main activity.
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
-                SignUp.this.finish();
+                SignUpActivity.this.finish();
             }
         });
     }
