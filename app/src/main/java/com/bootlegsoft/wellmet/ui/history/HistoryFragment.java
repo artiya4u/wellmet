@@ -1,5 +1,7 @@
 package com.bootlegsoft.wellmet.ui.history;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +19,7 @@ import com.bootlegsoft.wellmet.data.Meet;
 
 import java.util.ArrayList;
 
-public class HistoryFragment extends Fragment implements View.OnLongClickListener {
+public class HistoryFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "HistoryFragment";
     private HistoryViewModel historyViewModel;
@@ -42,10 +44,12 @@ public class HistoryFragment extends Fragment implements View.OnLongClickListene
         return root;
     }
 
+
     @Override
-    public boolean onLongClick(View v) {
-        Meet borrowModel = (Meet) v.getTag();
-        // TODO
-        return true;
+    public void onClick(View v) {
+        Meet meet = (Meet) v.getTag();
+        String uri = "http://maps.google.com/maps?q=loc:" + meet.latitude + "," + meet.longitude;
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        startActivity(intent);
     }
 }

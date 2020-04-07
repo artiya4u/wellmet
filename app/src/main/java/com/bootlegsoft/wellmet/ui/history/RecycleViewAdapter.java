@@ -16,11 +16,11 @@ import java.util.List;
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.RecyclerViewHolder> {
 
     private List<Meet> meetList;
-    private View.OnLongClickListener longClickListener;
+    private View.OnClickListener clickListener;
 
-    public RecycleViewAdapter(List<Meet> borrowModelList, View.OnLongClickListener longClickListener) {
-        this.meetList = borrowModelList;
-        this.longClickListener = longClickListener;
+    public RecycleViewAdapter(List<Meet> meetList, View.OnClickListener clickListener) {
+        this.meetList = meetList;
+        this.clickListener = clickListener;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         holder.beaconIdTextView.setText(Utils.shortenUUID(meet.beaconId));
         holder.meetTimeTextView.setText(Utils.getTimeAgo(meet.meetTime.getTime()));
         holder.itemView.setTag(meet);
-        holder.itemView.setOnLongClickListener(longClickListener);
+        holder.itemView.setOnClickListener(clickListener);
     }
 
     @Override

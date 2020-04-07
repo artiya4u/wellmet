@@ -35,7 +35,7 @@ public class Utils {
 
     public static String shortenUUID(String uuid) {
         if (uuid.length() == 36) {
-            return uuid.substring(0, 4) + "..." + uuid.substring(32);
+            return uuid.substring(0, 8) + "..." + uuid.substring(24);
         } else {
             return uuid;
         }
