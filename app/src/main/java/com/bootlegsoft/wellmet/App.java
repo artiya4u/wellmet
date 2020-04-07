@@ -30,7 +30,6 @@ import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
-import org.altbeacon.beacon.startup.RegionBootstrap;
 
 import java.util.Collection;
 import java.util.Date;
@@ -59,7 +58,6 @@ public class App extends Application implements BeaconConsumer {
     public static final long MILLIS_PER_DAY = 86400 * 1000;
 
     private BeaconManager beaconManager;
-    private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     BeaconParser beaconParser;
     private BeaconTransmitter beaconTransmitter;
@@ -86,9 +84,9 @@ public class App extends Application implements BeaconConsumer {
         // iBeacon parser
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
         beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
-        backgroundPowerSaver = new BackgroundPowerSaver(this);
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         updateNotification();
+        backgroundPowerSaver = new BackgroundPowerSaver(this);
         handler = new Handler();
     }
 
@@ -162,10 +160,6 @@ public class App extends Application implements BeaconConsumer {
 
     private void stopScan() {
         beaconManager.unbind(this);
-        if (regionBootstrap != null) {
-            regionBootstrap.disable();
-            regionBootstrap = null;
-        }
     }
 
     public void startAdvertise() {
