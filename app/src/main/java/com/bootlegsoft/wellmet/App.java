@@ -91,7 +91,7 @@ public class App extends Application implements BeaconConsumer {
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BEACON_LAYOUT));
         beaconParser = new BeaconParser().setBeaconLayout(BEACON_LAYOUT);
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
-        updateNotification();
+        createNotification();
         backgroundPowerSaver = new BackgroundPowerSaver(this);
         handler = new Handler();
     }
@@ -216,6 +216,10 @@ public class App extends Application implements BeaconConsumer {
                         String beaconId = b.getId1().toString();
 
                         Date currentTime = new Date();
+                        Meet meet = new Meet();
+                        meet.beaconId = beaconId;
+                        meet.meetTime = currentTime;
+                        meet.distance = b.getDistance();
 
                         // Check last alert of a beacon.
                         Long lastAlert = lastAlerts.get(beaconId);
@@ -225,9 +229,14 @@ public class App extends Application implements BeaconConsumer {
                                 return;
                             }
                         }
-                        if (b.getDistance() <= ALERT_DISTANCE && user.enableAlert) {
+                        if (b.getDistance() <= ALERT_DISTANCE) {
                             App.this.lastAlerts.put(beaconId, currentTime.getTime());
-                            sendNotificationBeacon(beaconId);
+                            App.this.lastSeen.put(beaconId, currentTime.getTime());
+                            saveMeet(meet);
+                            if (user.enableAlert) {
+                                sendNotificationBeacon(beaconId);
+                            }
+                            return;
                         }
 
                         // Check last seen of a beacon.
@@ -240,18 +249,7 @@ public class App extends Application implements BeaconConsumer {
                         }
                         if (b.getDistance() <= MONITORING_DISTANCE) {
                             App.this.lastSeen.put(beaconId, currentTime.getTime());
-                            Meet meet = new Meet();
-                            meet.beaconId = beaconId;
-                            meet.meetTime = currentTime;
-                            meet.distance = b.getDistance();
-
-                            Location lastBestLocation = getLastBestLocation();
-                            meet.latitude = lastBestLocation.getLatitude();
-                            meet.longitude = lastBestLocation.getLongitude();
-
-                            AppExecutors.getInstance().diskIO().execute(() -> {
-                                appDatabase.meetDao().insertAll(meet);
-                            });
+                            saveMeet(meet);
                         }
                     }
                 }
@@ -264,7 +262,21 @@ public class App extends Application implements BeaconConsumer {
         }
     }
 
-    private void updateNotification() {
+    private void saveMeet(Meet meet) {
+        Location lastBestLocation = getLastBestLocation();
+        meet.latitude = lastBestLocation.getLatitude();
+        meet.longitude = lastBestLocation.getLongitude();
+        Log.i(TAG, "Saving Beacon ID: " + meet.beaconId +
+                " Time: " + meet.meetTime.toString() +
+                " Latitude: " + meet.latitude +
+                " Longitude: " + meet.longitude +
+                " Distance: " + String.format("%.2f m", meet.distance));
+        AppExecutors.getInstance().diskIO().execute(() -> {
+            appDatabase.meetDao().insertAll(meet);
+        });
+    }
+
+    private void createNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Alert Channel
             final CharSequence name = getString(R.string.notif_alert_channel_name);
