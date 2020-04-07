@@ -293,7 +293,7 @@ public class App extends Application implements BeaconConsumer {
         //
         beaconManager.setEnableScheduledScanJobs(false);
         beaconManager.setBackgroundBetweenScanPeriod(0);
-        beaconManager.setBackgroundScanPeriod(1100);
+        beaconManager.setBackgroundScanPeriod(10000);
     }
 
     public void sendNotificationBeacon(String uuid) {
