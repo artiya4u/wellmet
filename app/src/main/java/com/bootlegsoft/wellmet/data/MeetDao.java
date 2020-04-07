@@ -14,7 +14,7 @@ public interface MeetDao {
     @Query("SELECT * FROM meet")
     List<Meet> getAll();
 
-    @Query("SELECT * FROM meet WHERE meetTime < date('now','-7 days');")
+    @Query("SELECT * FROM meet WHERE meetTime < date('now','-7 days') ORDER BY meetTime DESC;")
     LiveData<List<Meet>> loadAllFromLastWeek();
 
     @Query("SELECT COUNT(DISTINCT beaconId) FROM meet WHERE meetTime < date('now','-7 days');")

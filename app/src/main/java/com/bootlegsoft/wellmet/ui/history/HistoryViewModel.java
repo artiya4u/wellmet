@@ -1,19 +1,27 @@
 package com.bootlegsoft.wellmet.ui.history;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class HistoryViewModel extends ViewModel {
+import com.bootlegsoft.wellmet.data.AppDatabase;
+import com.bootlegsoft.wellmet.data.Meet;
 
-    private MutableLiveData<String> mText;
+import java.util.List;
 
-    public HistoryViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is history fragment");
+public class HistoryViewModel extends AndroidViewModel {
+
+    private AppDatabase appDatabase;
+    private LiveData<List<Meet>> meets;
+
+    public HistoryViewModel(Application application) {
+        super(application);
+        appDatabase = AppDatabase.getDatabase(this.getApplication());
+        meets = appDatabase.meetDao().loadAllFromLastWeek();
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<List<Meet>> getMeets() {
+        return meets;
     }
 }
