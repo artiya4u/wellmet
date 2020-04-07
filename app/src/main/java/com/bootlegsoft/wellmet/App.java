@@ -46,7 +46,8 @@ public class App extends Application implements BeaconConsumer {
     public static final int MAJOR = 0xC0;
     public static final int MINOR = 0x19;
 
-    public static final int IGNORE_PERIOD = 30 * 60 * 1000;
+    public static final int IGNORE_ALERT_PERIOD = 30 * 60 * 1000;
+    public static final int IGNORE_SAVE_PERIOD = 15 * 60 * 1000;
     public static final int RESTART_BEACON_INTERVAL = 15 * 60 * 1000;
 
     public static final float ALERT_DISTANCE = 1.0f;
@@ -56,6 +57,10 @@ public class App extends Application implements BeaconConsumer {
     public static final String CHANNEL_ID = "status";
     public static final String ALERT_CHANNEL_ID = "alert";
     public static final long MILLIS_PER_DAY = 86400 * 1000;
+    public static final long SCAN_INTERVAL = 10 * 1000;
+
+    public static final int BEACON_MANUFACTURER = 0x004C;
+    public static final int TX_POWER = -65;
 
     private BeaconManager beaconManager;
     private BackgroundPowerSaver backgroundPowerSaver;
@@ -66,6 +71,7 @@ public class App extends Application implements BeaconConsumer {
     private AppDatabase appDatabase;
     private User user;
     private HashMap<String, Long> lastAlerts = new HashMap<>();
+    private HashMap<String, Long> lastSeen = new HashMap<>();
 
     private static App sInstance;
 
@@ -171,13 +177,13 @@ public class App extends Application implements BeaconConsumer {
         }
 
         UUID uuid = getUUID();
-        Log.d(TAG, "UUID: " + uuid.toString());
+        Log.d(TAG, "Beacon UUID: " + uuid.toString());
         Beacon beacon = new Beacon.Builder()
                 .setId1(uuid.toString())
                 .setId2(String.valueOf(MAJOR))
                 .setId3(String.valueOf(MINOR))
-                .setManufacturer(0x004C)
-                .setTxPower(-65)
+                .setManufacturer(BEACON_MANUFACTURER)
+                .setTxPower(TX_POWER)
                 .build();
 
         beaconTransmitter.startAdvertising(beacon);
@@ -202,19 +208,20 @@ public class App extends Application implements BeaconConsumer {
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 if (beacons.size() > 0) {
                     for (Beacon b : beacons) {
-                        Log.i(TAG, "ID: " + b.getId1() +
+                        Log.i(TAG, "Found Beacon ID: " + b.getId1() +
                                 " Major: " + b.getId2() +
                                 " Minor: " + b.getId3() +
                                 " Distance: " + b.getDistance() + " meters");
 
                         String beaconId = b.getId1().toString();
-                        Long lastAlert = lastAlerts.get(beaconId);
+
                         Date currentTime = new Date();
 
                         // Check last alert of a beacon.
+                        Long lastAlert = lastAlerts.get(beaconId);
                         if (lastAlert != null) {
                             // Prevent alert too often.
-                            if (currentTime.getTime() - lastAlert < IGNORE_PERIOD) {
+                            if (currentTime.getTime() - lastAlert < IGNORE_ALERT_PERIOD) {
                                 return;
                             }
                         }
@@ -222,7 +229,17 @@ public class App extends Application implements BeaconConsumer {
                             App.this.lastAlerts.put(beaconId, currentTime.getTime());
                             sendNotificationBeacon(beaconId);
                         }
+
+                        // Check last seen of a beacon.
+                        Long seen = lastSeen.get(beaconId);
+                        if (seen != null) {
+                            // Prevent save data too often.
+                            if (currentTime.getTime() - seen < IGNORE_SAVE_PERIOD) {
+                                return;
+                            }
+                        }
                         if (b.getDistance() <= MONITORING_DISTANCE) {
+                            App.this.lastSeen.put(beaconId, currentTime.getTime());
                             Meet meet = new Meet();
                             meet.beaconId = beaconId;
                             meet.meetTime = currentTime;
@@ -293,7 +310,7 @@ public class App extends Application implements BeaconConsumer {
         //
         beaconManager.setEnableScheduledScanJobs(false);
         beaconManager.setBackgroundBetweenScanPeriod(0);
-        beaconManager.setBackgroundScanPeriod(10000);
+        beaconManager.setBackgroundScanPeriod(SCAN_INTERVAL);
     }
 
     public void sendNotificationBeacon(String uuid) {
