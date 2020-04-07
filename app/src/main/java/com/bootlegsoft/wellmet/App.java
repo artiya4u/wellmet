@@ -211,7 +211,7 @@ public class App extends Application implements BeaconConsumer {
                         Log.i(TAG, "Found Beacon ID: " + b.getId1() +
                                 " Major: " + b.getId2() +
                                 " Minor: " + b.getId3() +
-                                " Distance: " + b.getDistance() + " meters");
+                                " Distance: " + String.format("%.2f m", b.getDistance()));
 
                         String beaconId = b.getId1().toString();
 
