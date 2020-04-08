@@ -1,4 +1,4 @@
-# WellMet - Social Distance Monitor
+# WellMet - Social Distance Tracker
 
 ## Features
 - Track close contact with another user via Bluetooth LE iBeacon technology.

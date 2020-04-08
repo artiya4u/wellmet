@@ -10,14 +10,14 @@
     <string name="notification_warning_description">Keeping your distance to stay safe.</string>
     <string name="notification_channel_name">Status</string>
     <string name="notification_channel_description">Status of background work.</string>
-    <string name="notification_alert_channel_name">Alert</string>
+    <string name="notification_alert_channel_name">Proximity Alert</string>
     <string name="notification_alert_channel_description">Alert when someone getting too close</string>
     <string name="level1">Good</string>
     <string name="level2">Moderate</string>
     <string name="level3">Unhealthy</string>
     <string name="level4">Very Unhealthy</string>
-    <string name="alert_enabled">Proximity alert enabled</string>
-    <string name="alert_disabled">Proximity alert disabled</string>
+    <string name="alert_enabled">PROXIMITY ALERT ENABLED</string>
+    <string name="alert_disabled">PROXIMITY ALERT DISABLED</string>
     <string name="phone_use_description">For uniqueness only, it\'s OK to lie</string>
     <string name="ok">OK</string>
     <string name="sign_up_title">Your Phone Number</string>
@@ -29,7 +29,7 @@
     <string name="invalid_phone_number">Your phone number is too short</string>
 
     <string name="guide_title">Social Distance Guide</string>
-    <string name="guide_description">MellMet close contact number is the person-day per week. It means the same person can be count twice if you get close in 2 days in a week to provide data anonymity and still provide a meaningful number. This guide does not conform to any standard.</string>
+    <string name="guide_description">WellMet close contact number is the person-day per week. It means the same person can be count twice if you get close in 2 days in a week to provide data anonymity and still provide a meaningful number. This guide does not conform to any standard.</string>
     <string name="title_level1">0 – 50 Good</string>
     <string name="description_level1">Little or no risk, stay at home is still recommended.</string>
     <string name="title_level2">51 – 100 Moderate</string>
@@ -39,13 +39,17 @@
     <string name="title_level4">> 300 Very Unhealthy</string>
     <string name="description_level4">The highest chance of exposure should wear a respirator mask when close contact with others. An examination is highly recommended.</string>
 
-    <string name="user_code_title">YOUR CODE</string>
+    <string name="user_code_title">Your user code:</string>
     <string name="backup_warning">Tab to copy the code above then you can backup it. Don\'t let anyone else know the code. It can use for your anonymous close contact search.</string>
     <string name="how_it_work">How it work?</string>
-    <string name="notification_settings">Alert Notification Settings</string>
-    <string name="tell_your_friends">Tell Your Friends</string>
+    <string name="notification_settings">Alert notification settings</string>
+    <string name="tell_your_friends">Tell your friends</string>
     <string name="made_in">Made with ❤️ in Thailand</string>
     <string name="copied">Copied your code!</string>
-    <string name="export_your_data">Export Your Data (without location)</string>
+    <string name="export_your_data">Export your data (without location)</string>
+    <string name="how_it_work_link">https://medium.com/wellmet</string>
+    <string name="share">Share WellMet with your friends</string>
+    <string name="share_title">WellMet - Social Distance Tracker</string>
+    <string name="share_text">WellMet - Social Distance Tracker. Help track the spread of #COVID19 and other close contact infections. Download now at https://play.google.com/store/apps/details?id=</string>
 
 </resources>
