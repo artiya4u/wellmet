@@ -48,6 +48,9 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         Meet meet = (Meet) v.getTag();
+        if (meet.longitude == 0 && meet.latitude == 0) { // No geo location recorded.
+            return;
+        }
         String uri = "http://maps.google.com/maps?q=loc:" + meet.latitude + "," + meet.longitude;
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         startActivity(intent);

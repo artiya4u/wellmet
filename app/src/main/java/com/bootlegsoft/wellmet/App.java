@@ -264,8 +264,10 @@ public class App extends Application implements BeaconConsumer {
 
     private void saveMeet(Meet meet) {
         Location lastBestLocation = getLastBestLocation();
-        meet.latitude = lastBestLocation.getLatitude();
-        meet.longitude = lastBestLocation.getLongitude();
+        if (lastBestLocation != null) {
+            meet.latitude = lastBestLocation.getLatitude();
+            meet.longitude = lastBestLocation.getLongitude();
+        }
         Log.i(TAG, "Saving Beacon ID: " + meet.beaconId +
                 " Time: " + meet.meetTime.toString() +
                 " Latitude: " + meet.latitude +

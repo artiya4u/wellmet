@@ -1,8 +1,10 @@
 package com.bootlegsoft.wellmet.ui.history;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +39,12 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         holder.meetTimeTextView.setText(Utils.getTimeAgo(meet.meetTime.getTime()));
         holder.itemView.setTag(meet);
         holder.itemView.setOnClickListener(clickListener);
+        Log.d("meet", "Lon: " + meet.longitude + "Lat: " + meet.latitude);
+        if (meet.latitude == 0 && meet.longitude == 0) {
+            holder.locationImage.setVisibility(View.INVISIBLE);
+        } else {
+            holder.locationImage.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -53,12 +61,14 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         private TextView distanceTextView;
         private TextView beaconIdTextView;
         private TextView meetTimeTextView;
+        private ImageView locationImage;
 
         RecyclerViewHolder(View view) {
             super(view);
             distanceTextView = (TextView) view.findViewById(R.id.distance);
             beaconIdTextView = (TextView) view.findViewById(R.id.beaconId);
             meetTimeTextView = (TextView) view.findViewById(R.id.meetTime);
+            locationImage = (ImageView) view.findViewById(R.id.locationImage);
         }
     }
 }
