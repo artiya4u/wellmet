@@ -47,6 +47,7 @@ public class ProfileFragment extends Fragment {
             toast.show();
         });
 
+        String storeURL = "https://play.google.com/store/apps/details?id=" + this.getActivity().getPackageName();
         TextView notificationSettingView = root.findViewById(R.id.notification_setting);
         notificationSettingView.setOnClickListener(v -> {
             Intent intent = new Intent();
@@ -64,7 +65,7 @@ public class ProfileFragment extends Fragment {
 
         TextView tellYourFriendView = root.findViewById(R.id.tell_your_friends);
         tellYourFriendView.setOnClickListener(v -> {
-            String shareBody = getString(R.string.share_text) + this.getActivity().getPackageName();
+            String shareBody = getString(R.string.share_text) + " " + storeURL;
             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.share_title));
@@ -82,6 +83,14 @@ public class ProfileFragment extends Fragment {
                 String showCode = user.userCode.substring(0, 4) + stars + user.userCode.substring(58);
                 userCodeView.setText(showCode);
             }
+        });
+
+        TextView rateView = root.findViewById(R.id.rate);
+        rateView.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(storeURL));
+            intent.setPackage("com.android.vending");
+            startActivity(intent);
         });
 
         TextView exportYourDataView = root.findViewById(R.id.export_your_data);
