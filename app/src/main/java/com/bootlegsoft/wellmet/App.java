@@ -144,7 +144,7 @@ public class App extends Application implements BeaconConsumer {
 
     public UUID getUUID() {
         long todayStart = (new Date().getTime() / MILLIS_PER_DAY) * MILLIS_PER_DAY;
-        return Utils.genBeaconUUID(user.wellKey(), new Date(todayStart));
+        return Utils.genBeaconUUID(Utils.hexToBytes(user.userCode), new Date(todayStart));
     }
 
 
