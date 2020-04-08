@@ -281,8 +281,8 @@ public class App extends Application implements BeaconConsumer {
     private void createNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Alert Channel
-            final CharSequence name = getString(R.string.notif_alert_channel_name);
-            final String description = getString(R.string.notif_alert_channel_description);
+            final CharSequence name = getString(R.string.notification_alert_channel_name);
+            final String description = getString(R.string.notification_alert_channel_description);
             final int importance = NotificationManager.IMPORTANCE_HIGH;
             final NotificationChannel channel = new NotificationChannel(ALERT_CHANNEL_ID, name, importance);
             channel.setDescription(description);
@@ -293,8 +293,8 @@ public class App extends Application implements BeaconConsumer {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Status channel
-            final CharSequence name = getString(R.string.notif_channel_name);
-            final String description = getString(R.string.notif_channel_description);
+            final CharSequence name = getString(R.string.notification_channel_name);
+            final String description = getString(R.string.notification_channel_description);
             final int importance = NotificationManager.IMPORTANCE_LOW;
             final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
@@ -307,8 +307,8 @@ public class App extends Application implements BeaconConsumer {
         builder
                 .setSmallIcon(R.drawable.ic_radio)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setContentTitle(getString(R.string.notif_title))
-                .setContentText(getString(R.string.notif_message));
+                .setContentTitle(getString(R.string.notification_title))
+                .setContentText(getString(R.string.notification_message));
 
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -331,8 +331,8 @@ public class App extends Application implements BeaconConsumer {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ALERT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_radio)
-                .setContentTitle(getString(R.string.notif_warning_title))
-                .setContentText(getString(R.string.notif_warning_description))
+                .setContentTitle(getString(R.string.notification_warning_title))
+                .setContentText(getString(R.string.notification_warning_description))
                 .setVibrate(new long[]{1000})
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 

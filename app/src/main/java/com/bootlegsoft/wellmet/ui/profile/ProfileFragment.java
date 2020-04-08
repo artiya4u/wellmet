@@ -3,6 +3,7 @@ package com.bootlegsoft.wellmet.ui.profile;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,6 @@ import androidx.lifecycle.ViewModelProviders;
 import com.bootlegsoft.wellmet.R;
 import com.bootlegsoft.wellmet.data.User;
 import com.bootlegsoft.wellmet.ui.AppViewModel;
-
 
 
 public class ProfileFragment extends Fragment {
@@ -43,6 +43,19 @@ public class ProfileFragment extends Fragment {
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
         });
+
+        TextView notificationSettingView = root.findViewById(R.id.notification_setting);
+        notificationSettingView.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            intent.putExtra("app_package", this.getActivity().getPackageName());
+            intent.putExtra("app_uid", this.getActivity().getApplicationInfo().uid);
+            intent.putExtra("android.provider.extra.APP_PACKAGE", this.getActivity().getPackageName());
+            startActivity(intent);
+        });
+        TextView exportYourDataView = root.findViewById(R.id.export_your_data);
+        TextView howItWorkView = root.findViewById(R.id.how_it_work);
+        TextView tellYourFriend = root.findViewById(R.id.tell_your_friends);
 
         appViewModel.getUser().observe(getViewLifecycleOwner(), updateUser -> {
             if (updateUser != null) {
