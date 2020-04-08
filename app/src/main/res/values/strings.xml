@@ -28,7 +28,7 @@
     <string name="bluetooth_le_not_available_msg">Sorry, this device does not support Bluetooth LE.</string>
     <string name="invalid_phone_number">Your phone number is too short</string>
     <string name="guide_title">Social Distance Guide</string>
-    <string name="guide_description">MellMet close contact number is the man-day per week. It means the same person can be count twice if you get close in 2 days in a week to provide data anonymity and still provide a meaningful number. This guide does not conform to any standard.</string>
+    <string name="guide_description">MellMet close contact number is the person-day per week. It means the same person can be count twice if you get close in 2 days in a week to provide data anonymity and still provide a meaningful number. This guide does not conform to any standard.</string>
 
     <string name="title_level1">0 – 50 Good</string>
     <string name="description_level1">Little or no risk, stay at home is still recommended.</string>
@@ -41,4 +41,14 @@
 
     <string name="title_level4">> 300 Very Unhealthy</string>
     <string name="description_level4">The highest chance of exposure should wear a respirator mask when close contact with others. An examination is highly recommended.</string>
+
+    <string name="user_code_title">YOUR CODE</string>
+    <string name="backup_warning">Tab to copy then you can backup the code above and don\'t let anyone else know it. It will be used for your anonymous close contact search.</string>
+    <string name="how_it_work">How it work?</string>
+    <string name="notification_settings">Alert Notification Settings</string>
+    <string name="tell_your_friends">Tell Your Friends</string>
+    <string name="made_in">Made with ❤️ in Thailand</string>
+    <string name="copied">Copied your code!</string>
+    <string name="export_your_data">Export Your Data (without location)</string>
+
 </resources>
