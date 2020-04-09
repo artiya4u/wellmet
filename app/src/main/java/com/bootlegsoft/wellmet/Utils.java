@@ -4,6 +4,7 @@ package com.bootlegsoft.wellmet;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
@@ -79,32 +80,12 @@ public class Utils {
         }
     }
 
-    public static String getTimeAgo(long time) {
-        if (time < 1000000000000L) {
-            time *= 1000;
-        }
-
-        long now = System.currentTimeMillis();
-        if (time > now || time <= 0) {
-            return null;
-        }
-
-
-        final long diff = now - time;
-        if (diff < MINUTE_MILLIS) {
-            return "just now";
-        } else if (diff < 2 * MINUTE_MILLIS) {
-            return "a minute ago";
-        } else if (diff < 50 * MINUTE_MILLIS) {
-            return diff / MINUTE_MILLIS + " minutes ago";
-        } else if (diff < 90 * MINUTE_MILLIS) {
-            return "an hour ago";
-        } else if (diff < 24 * HOUR_MILLIS) {
-            return diff / HOUR_MILLIS + " hours ago";
-        } else if (diff < 48 * HOUR_MILLIS) {
-            return "yesterday";
+    public static String getFormattedDateOrTime(Date date) {
+        long todayStart = (new Date().getTime() / DAY_MILLIS) * DAY_MILLIS;
+        if (date.getTime() > todayStart) {
+            return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(date);
         } else {
-            return diff / DAY_MILLIS + " days ago";
+            return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
         }
     }
 

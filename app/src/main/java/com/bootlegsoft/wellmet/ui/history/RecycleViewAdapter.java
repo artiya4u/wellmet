@@ -36,7 +36,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         Meet meet = meetList.get(position);
         holder.distanceTextView.setText(String.format("%.2f m", meet.distance));
         holder.beaconIdTextView.setText(Utils.shortenUUID(meet.beaconId));
-        holder.meetTimeTextView.setText(Utils.getTimeAgo(meet.meetTime.getTime()));
+        holder.meetTimeTextView.setText(Utils.getFormattedDateOrTime(meet.meetTime));
         holder.itemView.setTag(meet);
         holder.itemView.setOnClickListener(clickListener);
         Log.d("meet", "Lon: " + meet.longitude + "Lat: " + meet.latitude);
