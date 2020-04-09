@@ -4,7 +4,6 @@ package com.bootlegsoft.wellmet;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
@@ -77,15 +76,6 @@ public class Utils {
             return uuid.substring(0, 8) + "..." + uuid.substring(24);
         } else {
             return uuid;
-        }
-    }
-
-    public static String getFormattedDateOrTime(Date date) {
-        long todayStart = (new Date().getTime() / DAY_MILLIS) * DAY_MILLIS;
-        if (date.getTime() > todayStart) {
-            return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(date);
-        } else {
-            return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
         }
     }
 
