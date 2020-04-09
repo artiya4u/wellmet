@@ -1,5 +1,6 @@
 package com.bootlegsoft.wellmet.ui.profile;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -13,13 +14,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ShareCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.bootlegsoft.wellmet.BuildConfig;
 import com.bootlegsoft.wellmet.R;
+import com.bootlegsoft.wellmet.data.AppDatabase;
+import com.bootlegsoft.wellmet.data.AppExecutors;
+import com.bootlegsoft.wellmet.data.Meet;
 import com.bootlegsoft.wellmet.data.User;
 import com.bootlegsoft.wellmet.ui.AppViewModel;
+import com.google.gson.Gson;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 public class ProfileFragment extends Fragment {
@@ -27,10 +38,12 @@ public class ProfileFragment extends Fragment {
     private static final String APP_VERSION = "v." + BuildConfig.VERSION_NAME;
 
     private AppViewModel appViewModel;
+    private AppDatabase appDatabase;
     private User user;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        appDatabase = AppDatabase.getDatabase(getContext());
         appViewModel =
                 ViewModelProviders.of(this).get(AppViewModel.class);
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -79,8 +92,8 @@ public class ProfileFragment extends Fragment {
         appViewModel.getUser().observe(getViewLifecycleOwner(), updateUser -> {
             if (updateUser != null) {
                 user = updateUser;
-                String stars = "********************************************************";
-                String showCode = user.userCode.substring(0, 4) + stars + user.userCode.substring(58);
+                String stars = "****************************";
+                String showCode = user.userCode.substring(0, 4) + stars;
                 userCodeView.setText(showCode);
             }
         });
@@ -94,7 +107,36 @@ public class ProfileFragment extends Fragment {
         });
 
         TextView exportYourDataView = root.findViewById(R.id.export_your_data);
-        // TODO export data.
+        exportYourDataView.setOnClickListener(v -> {
+            AppExecutors.getInstance().diskIO().execute(() -> {
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                String formattedDate = fmt.format(new Date());
+                List<Meet> allMeet = appDatabase.meetDao().getAll();
+                List<ExportMeet> exportMeets = new ArrayList<>();
+                for (Meet m : allMeet) {
+                    ExportMeet e = new ExportMeet();
+                    e.beaconId = m.beaconId;
+                    e.timeStamp = m.meetTime.getTime();
+                    e.distance = (double) Math.round(m.distance * 100) / 100;
+                    exportMeets.add(e);
+                }
+                Gson gson = new Gson();
+                String exportedJson = gson.toJson(exportMeets);
+                Intent shareIntent = ShareCompat.IntentBuilder.from(getActivity())
+                        .setType("application/json")
+                        .setText(exportedJson)
+                        .setSubject("WellMet-" + formattedDate + ".json")
+                        .getIntent();
+                startActivity(shareIntent);
+            });
+        });
         return root;
+    }
+
+    private static class ExportMeet {
+        long timeStamp;
+        String beaconId;
+        double distance;
     }
 }
