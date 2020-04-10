@@ -60,7 +60,7 @@ public class ProfileFragment extends Fragment {
             toast.show();
         });
 
-        String storeURL = "https://play.google.com/store/apps/details?id=" + this.getActivity().getPackageName();
+        String storeURL = "https://github.com/artiya4u/wellmet/releases";
         TextView notificationSettingView = root.findViewById(R.id.notification_setting);
         notificationSettingView.setOnClickListener(v -> {
             Intent intent = new Intent();
@@ -97,13 +97,11 @@ public class ProfileFragment extends Fragment {
                 userCodeView.setText(showCode);
             }
         });
-
+        String issuesURL = "https://github.com/artiya4u/wellmet/issues";
         TextView rateView = root.findViewById(R.id.rate);
         rateView.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(storeURL));
-            intent.setPackage("com.android.vending");
-            startActivity(intent);
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(issuesURL));
+            startActivity(browserIntent);
         });
 
         TextView exportYourDataView = root.findViewById(R.id.export_your_data);

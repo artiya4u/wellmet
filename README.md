@@ -7,6 +7,8 @@
 - View detail of user close contact history e.g. time and place.
 - Using an offline database but can export for further analysis and cannot trace back an individual more than a day.
 
+![ss.jpg](screenshot/ss.jpg)
+
 ## How it work?
 WellMet is a social distance tracker. It allows the user to track the number of close contact from the smartphone Bluetooth sensor. By advertising and scanning device UUID(Universally unique identifier) using low energy wireless radio also known as the beacon, another user can collect and range the distance nearby devices by the signal strength. WellMet will collect other device’s UUID when only in close range at 2 meters and will alert the user when the device closer than 1 meter. The application will keep the record of the met device in the offline database on the user phone and show a number of close contact users within the last 7 days.
 
