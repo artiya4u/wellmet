@@ -2,7 +2,7 @@
 
 ## Features
 - Track close contact with another user via Bluetooth LE iBeacon technology.
-- Alert when another user getting to close to keep the distance.
+- Alert when another user getting too close to keep the distance.
 - Dashboard to summary met history number and social distance level.
 - View detail of user close contact history e.g. time and place.
 - Using an offline database but can export for further analysis and cannot trace back an individual more than a day.
@@ -26,22 +26,20 @@ The user code is a uniquely large number generate from a pseudo-random number ge
 
 
 ## License
+```
 WellMet - Social Distance Tracker
-
 Copyright (C) 2020  Artiya Thinkumpang
-
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```

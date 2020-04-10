@@ -337,6 +337,11 @@ public class App extends Application implements BeaconConsumer {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        builder.setContentIntent(pendingIntent);
 
         // notificationId is a unique int for each notification that you must define
         notificationManager.notify(uuid.hashCode(), builder.build());
