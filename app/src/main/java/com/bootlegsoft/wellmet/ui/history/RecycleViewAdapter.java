@@ -13,6 +13,7 @@ import com.bootlegsoft.wellmet.R;
 import com.bootlegsoft.wellmet.Utils;
 import com.bootlegsoft.wellmet.data.Meet;
 
+import java.text.DateFormat;
 import java.util.List;
 
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.RecyclerViewHolder> {
@@ -36,7 +37,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         Meet meet = meetList.get(position);
         holder.distanceTextView.setText(String.format("%.2f m", meet.distance));
         holder.beaconIdTextView.setText(Utils.shortenUUID(meet.beaconId));
-        holder.meetTimeTextView.setText(Utils.getFormattedDateOrTime(meet.meetTime));
+        holder.meetTimeTextView.setText(DateFormat.getDateTimeInstance().format(meet.meetTime));
         holder.itemView.setTag(meet);
         holder.itemView.setOnClickListener(clickListener);
         Log.d("meet", "Lon: " + meet.longitude + "Lat: " + meet.latitude);
