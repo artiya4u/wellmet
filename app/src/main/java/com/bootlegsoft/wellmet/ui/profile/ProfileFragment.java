@@ -51,7 +51,7 @@ public class ProfileFragment extends Fragment {
         userCodeView.setOnClickListener(v -> {
             // Gets a handle to the clipboard service.
             ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("USER_CODE", user.userCode);
+            ClipData clip = ClipData.newPlainText("USER_CODE", user.tracingKey);
             clipboard.setPrimaryClip(clip);
             Context context = getActivity();
             CharSequence text = getString(R.string.copied);
@@ -60,7 +60,6 @@ public class ProfileFragment extends Fragment {
             toast.show();
         });
 
-        String storeURL = "https://github.com/artiya4u/wellmet/releases";
         TextView notificationSettingView = root.findViewById(R.id.notification_setting);
         notificationSettingView.setOnClickListener(v -> {
             Intent intent = new Intent();
@@ -78,7 +77,7 @@ public class ProfileFragment extends Fragment {
 
         TextView tellYourFriendView = root.findViewById(R.id.tell_your_friends);
         tellYourFriendView.setOnClickListener(v -> {
-            String shareBody = getString(R.string.share_text) + " " + storeURL;
+            String shareBody = getString(R.string.share_text);
             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.share_title));
@@ -93,7 +92,7 @@ public class ProfileFragment extends Fragment {
             if (updateUser != null) {
                 user = updateUser;
                 String stars = "****************************";
-                String showCode = user.userCode.substring(0, 4) + stars;
+                String showCode = user.tracingKey.substring(0, 4) + stars;
                 userCodeView.setText(showCode);
             }
         });

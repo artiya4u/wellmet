@@ -2,19 +2,17 @@ package com.bootlegsoft.wellmet;
 
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
 
 public class Utils {
 
-    private static final int SECOND_MILLIS = 1000;
-    private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
-    private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
-    private static final int DAY_MILLIS = 24 * HOUR_MILLIS;
+    private static final String CT_DTK = "CT-DTK";
+    private static final String CT_RPI = "CT-RPI";
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
@@ -44,14 +42,14 @@ public class Utils {
         return buffer.array();
     }
 
-    public static String genRandomSearchCode(String phoneNumber) {
+    public static String genTracingKey(String salt) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(phoneNumber.getBytes()); // Add more uniqueness
+            md.update(salt.getBytes()); // Add more uniqueness
             Random randomNo = new Random();
-            byte[] r = new byte[32]; // 256 bits
-            randomNo.nextBytes(r);
-            md.update(r);
+            byte[] ikm = new byte[32]; // 256 bits
+            randomNo.nextBytes(ikm);
+            md.update(ikm);
             byte[] digest = md.digest();
             return Utils.bytesToHex(digest);
         } catch (NoSuchAlgorithmException cnse) {
@@ -59,12 +57,31 @@ public class Utils {
         }
     }
 
-    public static UUID genBeaconUUID(byte[] searchKey, Date beaconStartTime) {
+    public static byte[] genDailyTracingKey(byte[] tracingKey) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(searchKey);
-            md.update(longToBytes(beaconStartTime.getTime()));
+            md.update(tracingKey);
+            md.update(CT_DTK.getBytes(StandardCharsets.UTF_8));
             byte[] digest = md.digest();
+            // Truncate to 16 bytes
+            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            UUID dailyUUID = UUID.nameUUIDFromBytes(digest);
+            bb.putLong(dailyUUID.getMostSignificantBits());
+            bb.putLong(dailyUUID.getLeastSignificantBits());
+            return bb.array();
+        } catch (NoSuchAlgorithmException cnse) {
+            return null;
+        }
+    }
+
+    public static UUID genRollingProximityIdentifier(byte[] dailyTracingKey, long timeIntervalNumber) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(dailyTracingKey);
+            md.update(CT_RPI.getBytes(StandardCharsets.UTF_8));
+            md.update(longToBytes(timeIntervalNumber));
+            byte[] digest = md.digest();
+            // Truncate to UUID
             return UUID.nameUUIDFromBytes(digest);
         } catch (NoSuchAlgorithmException cnse) {
             return null;

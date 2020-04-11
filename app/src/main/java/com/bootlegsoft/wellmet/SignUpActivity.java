@@ -65,7 +65,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 newUser.phoneNumber = phoneNumberOnly;
                                 newUser.createTime = new Date();
                                 newUser.enableAlert = true;
-                                newUser.userCode = Utils.genRandomSearchCode(newUser.phoneNumber);
+                                newUser.tracingKey = Utils.genTracingKey(newUser.phoneNumber);
                                 appDatabase.userDao().insertAll(newUser);
                                 Log.d(TAG, "Create user: " + newUser.phoneNumber);
                                 // Go to main activity.

@@ -15,8 +15,8 @@ public class User {
     @ColumnInfo(name = "phoneNumber")
     public String phoneNumber;
 
-    @ColumnInfo(name = "userCode")
-    public String userCode;
+    @ColumnInfo(name = "tracingKey")
+    public String tracingKey;
 
     @ColumnInfo(name = "enableAlert")
     public boolean enableAlert;

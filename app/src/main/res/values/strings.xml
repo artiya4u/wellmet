@@ -29,27 +29,27 @@
     <string name="invalid_phone_number">Your phone number is too short</string>
 
     <string name="guide_title">Social Distance Guide</string>
-    <string name="guide_description">WellMet close contact number is the person-day per week. It means the same person can be count twice if you get close in 2 days in a week to provide data anonymity and still provide a meaningful number. This guide does not conform to any standard.</string>
-    <string name="title_level1">0 – 50 Good</string>
+    <string name="guide_description">WellMet close contact number is the unique person in 15 minutes per week. **This guide does not conform to any standard.**</string>
+    <string name="title_level1">0 – 200 Good</string>
     <string name="description_level1">Little or no risk, stay at home is still recommended.</string>
-    <string name="title_level2">51 – 100 Moderate</string>
+    <string name="title_level2">200 – 400 Moderate</string>
     <string name="description_level2">Medium contact, should avoid close contact and wear a mask in work or public place.</string>
-    <string name="title_level3">101 – 300 Unhealthy</string>
+    <string name="title_level3">400 – 800 Unhealthy</string>
     <string name="description_level3">Increased likelihood of exposure, should wear a mask all the time. Seek a doctor when found yourself any symptom.</string>
-    <string name="title_level4">> 300 Very Unhealthy</string>
+    <string name="title_level4">> 800 Very Unhealthy</string>
     <string name="description_level4">The highest chance of exposure should wear a respirator mask when close contact with others. An examination is highly recommended.</string>
 
-    <string name="user_code_title">Your user code:</string>
-    <string name="backup_warning">Tab to copy the code above then you can backup it. Don\'t let anyone else know the code. It can use for your anonymous close contact search.</string>
+    <string name="user_code_title">Your Tracing Key:</string>
+    <string name="backup_warning">Tab to copy the key above then you can backup it. Don\'t let anyone else know the key. It can use for your anonymous close contact search.</string>
     <string name="how_it_work">How it work?</string>
     <string name="notification_settings">Alert notification settings</string>
     <string name="tell_your_friends">Tell your friends</string>
     <string name="made_in">Made with ❤️ in Thailand</string>
-    <string name="copied">Copied your code!</string>
+    <string name="copied">Copied Tracing Key!</string>
     <string name="export_your_data">Export your data (without location)</string>
-    <string name="how_it_work_link">https://medium.com/wellmet</string>
+    <string name="how_it_work_link">https://medium.com/wellmet/how-wellmet-work-f5e1239b3fce</string>
     <string name="share">Share WellMet with your friends</string>
     <string name="share_title">WellMet - Social Distance Tracker</string>
-    <string name="share_text">WellMet - Social Distance Tracker. Help track the spread of #COVID19 and other close contact infections. Download now at</string>
+    <string name="share_text">WellMet - Social Distance Tracker. Help track the spread of #COVID19 and other close contact infections. Download now at https://github.com/artiya4u/wellmet/releases</string>
     <string name="rate">Feedback</string>
 </resources>
