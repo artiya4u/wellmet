@@ -31,9 +31,11 @@ import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -147,9 +149,27 @@ public class App extends Application implements BeaconConsumer {
         long dayNumber = timeStampNow / MILLIS_PER_DAY;
         long todayStart = dayNumber * MILLIS_PER_DAY;
         // Smart phone is pretty fast, It's ok to hash a new one ever 15 minutes.
-        byte[] dailyTracingKey = Utils.genDailyTracingKey(Utils.hexToBytes(user.tracingKey));
+        byte[] dailyTracingKey = Utils.genDailyTracingKey(Utils.hexToBytes(user.tracingKey), dayNumber);
+        // Guess timeIntervalNumber start with 0
         long timeIntervalNumber = (timeStampNow - todayStart) / RESTART_BEACON_INTERVAL;
         return Utils.genRollingProximityIdentifier(dailyTracingKey, timeIntervalNumber);
+    }
+
+    public List<String> getAllRollingProximityIdentifier() {
+        List<String> result = new ArrayList<>();
+        long timeStampNow = new Date().getTime();
+        long currentDate = user.createTime.getTime();
+        while (currentDate <= timeStampNow) {
+            long dayNumber = currentDate / MILLIS_PER_DAY;
+            byte[] dailyTracingKey = Utils.genDailyTracingKey(Utils.hexToBytes(user.tracingKey), dayNumber);
+            long maxIntervalPerDay = MILLIS_PER_DAY / RESTART_BEACON_INTERVAL;
+            for (long timeIntervalNumber = 0; timeIntervalNumber < maxIntervalPerDay; timeIntervalNumber++) {
+                UUID rpi = Utils.genRollingProximityIdentifier(dailyTracingKey, timeIntervalNumber);
+                result.add(rpi.toString());
+            }
+            currentDate += MILLIS_PER_DAY;
+        }
+        return result;
     }
 
 

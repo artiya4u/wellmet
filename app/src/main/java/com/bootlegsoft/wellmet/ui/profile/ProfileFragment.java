@@ -18,6 +18,7 @@ import androidx.core.app.ShareCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.bootlegsoft.wellmet.App;
 import com.bootlegsoft.wellmet.BuildConfig;
 import com.bootlegsoft.wellmet.R;
 import com.bootlegsoft.wellmet.data.AppDatabase;
@@ -118,8 +119,12 @@ public class ProfileFragment extends Fragment {
                     e.distance = (double) Math.round(m.distance * 100) / 100;
                     exportMeets.add(e);
                 }
+                ExportData export = new ExportData();
+                export.rollingProximityIdentifiers = App.getInstance().getAllRollingProximityIdentifier();
+                export.contactedMeets = exportMeets;
+
                 Gson gson = new Gson();
-                String exportedJson = gson.toJson(exportMeets);
+                String exportedJson = gson.toJson(export);
                 Intent shareIntent = ShareCompat.IntentBuilder.from(getActivity())
                         .setType("application/json")
                         .setText(exportedJson)
@@ -129,6 +134,11 @@ public class ProfileFragment extends Fragment {
             });
         });
         return root;
+    }
+
+    private static class ExportData {
+        List<String> rollingProximityIdentifiers = new ArrayList<>();
+        List<ExportMeet> contactedMeets = new ArrayList<>();
     }
 
     private static class ExportMeet {

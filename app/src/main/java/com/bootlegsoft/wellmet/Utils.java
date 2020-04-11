@@ -57,11 +57,12 @@ public class Utils {
         }
     }
 
-    public static byte[] genDailyTracingKey(byte[] tracingKey) {
+    public static byte[] genDailyTracingKey(byte[] tracingKey, long dayNumber) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(tracingKey);
             md.update(CT_DTK.getBytes(StandardCharsets.UTF_8));
+            md.update(longToBytes(dayNumber));
             byte[] digest = md.digest();
             // Truncate to 16 bytes
             ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
