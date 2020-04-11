@@ -32,11 +32,11 @@
     <string name="guide_description">WellMet close contact number is the unique person in 15 minutes per week. **This guide does not conform to any standard.**</string>
     <string name="title_level1">0 – 200 Good</string>
     <string name="description_level1">Little or no risk, stay at home is still recommended.</string>
-    <string name="title_level2">200 – 450 Moderate</string>
+    <string name="title_level2">200 – 400 Moderate</string>
     <string name="description_level2">Medium contact, should avoid close contact and wear a mask in work or public place.</string>
-    <string name="title_level3">450 – 900 Unhealthy</string>
+    <string name="title_level3">400 – 800 Unhealthy</string>
     <string name="description_level3">Increased likelihood of exposure, should wear a mask all the time. Seek a doctor when found yourself any symptom.</string>
-    <string name="title_level4">> 900 Very Unhealthy</string>
+    <string name="title_level4">> 800 Very Unhealthy</string>
     <string name="description_level4">The highest chance of exposure should wear a respirator mask when close contact with others. An examination is highly recommended.</string>
 
     <string name="user_code_title">Your Tracing Key:</string>

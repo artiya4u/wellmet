@@ -95,11 +95,11 @@ public class DashboardFragment extends Fragment {
             level.text = getString(R.string.level1);
             level.textColor = R.color.colorLevel1;
             level.image = R.drawable.ic_level1;
-        } else if (userCount <= 450) {
+        } else if (userCount <= 400) {
             level.text = getString(R.string.level2);
             level.textColor = R.color.colorLevel2;
             level.image = R.drawable.ic_level2;
-        } else if (userCount <= 900) {
+        } else if (userCount <= 800) {
             level.text = getString(R.string.level3);
             level.textColor = R.color.colorLevel3;
             level.image = R.drawable.ic_level3;
