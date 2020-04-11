@@ -21,9 +21,6 @@ import androidx.lifecycle.ViewModelProviders;
 import com.bootlegsoft.wellmet.App;
 import com.bootlegsoft.wellmet.BuildConfig;
 import com.bootlegsoft.wellmet.R;
-import com.bootlegsoft.wellmet.data.AppDatabase;
-import com.bootlegsoft.wellmet.data.AppExecutors;
-import com.bootlegsoft.wellmet.data.Meet;
 import com.bootlegsoft.wellmet.data.User;
 import com.bootlegsoft.wellmet.ui.AppViewModel;
 import com.google.gson.Gson;
@@ -39,12 +36,10 @@ public class ProfileFragment extends Fragment {
     private static final String APP_VERSION = "v." + BuildConfig.VERSION_NAME;
 
     private AppViewModel appViewModel;
-    private AppDatabase appDatabase;
     private User user;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        appDatabase = AppDatabase.getDatabase(getContext());
         appViewModel =
                 ViewModelProviders.of(this).get(AppViewModel.class);
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -106,44 +101,25 @@ public class ProfileFragment extends Fragment {
 
         TextView exportYourDataView = root.findViewById(R.id.export_your_data);
         exportYourDataView.setOnClickListener(v -> {
-            AppExecutors.getInstance().diskIO().execute(() -> {
-                @SuppressLint("SimpleDateFormat")
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-                String formattedDate = fmt.format(new Date());
-                List<Meet> allMeet = appDatabase.meetDao().getAll();
-                List<ExportMeet> exportMeets = new ArrayList<>();
-                for (Meet m : allMeet) {
-                    ExportMeet e = new ExportMeet();
-                    e.beaconId = m.beaconId;
-                    e.timeStamp = m.meetTime.getTime();
-                    e.distance = (double) Math.round(m.distance * 100) / 100;
-                    exportMeets.add(e);
-                }
-                ExportData export = new ExportData();
-                export.rollingProximityIdentifiers = App.getInstance().getAllRollingProximityIdentifier();
-                export.contactedMeets = exportMeets;
+            @SuppressLint("SimpleDateFormat")
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            String formattedDate = fmt.format(new Date());
+            DiagnosisKey export = new DiagnosisKey();
+            export.dailyTracingKeys = App.getInstance().getAllDailyTracingKey();
 
-                Gson gson = new Gson();
-                String exportedJson = gson.toJson(export);
-                Intent shareIntent = ShareCompat.IntentBuilder.from(getActivity())
-                        .setType("application/json")
-                        .setText(exportedJson)
-                        .setSubject("WellMet-" + formattedDate + ".json")
-                        .getIntent();
-                startActivity(shareIntent);
-            });
+            Gson gson = new Gson();
+            String exportedJson = gson.toJson(export);
+            Intent shareIntent = ShareCompat.IntentBuilder.from(getActivity())
+                    .setType("application/json")
+                    .setText(exportedJson)
+                    .setSubject("WellMet-" + formattedDate + ".json")
+                    .getIntent();
+            startActivity(shareIntent);
         });
         return root;
     }
 
-    private static class ExportData {
-        List<String> rollingProximityIdentifiers = new ArrayList<>();
-        List<ExportMeet> contactedMeets = new ArrayList<>();
-    }
-
-    private static class ExportMeet {
-        long timeStamp;
-        String beaconId;
-        double distance;
+    private static class DiagnosisKey {
+        List<String> dailyTracingKeys = new ArrayList<>();
     }
 }

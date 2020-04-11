@@ -155,18 +155,14 @@ public class App extends Application implements BeaconConsumer {
         return Utils.genRollingProximityIdentifier(dailyTracingKey, timeIntervalNumber);
     }
 
-    public List<String> getAllRollingProximityIdentifier() {
+    public List<String> getAllDailyTracingKey() {
         List<String> result = new ArrayList<>();
         long timeStampNow = new Date().getTime();
         long currentDate = user.createTime.getTime();
         while (currentDate <= timeStampNow) {
             long dayNumber = currentDate / MILLIS_PER_DAY;
             byte[] dailyTracingKey = Utils.genDailyTracingKey(Utils.hexToBytes(user.tracingKey), dayNumber);
-            long maxIntervalPerDay = MILLIS_PER_DAY / RESTART_BEACON_INTERVAL;
-            for (long timeIntervalNumber = 0; timeIntervalNumber < maxIntervalPerDay; timeIntervalNumber++) {
-                UUID rpi = Utils.genRollingProximityIdentifier(dailyTracingKey, timeIntervalNumber);
-                result.add(rpi.toString());
-            }
+            result.add(Utils.bytesToHex(dailyTracingKey));
             currentDate += MILLIS_PER_DAY;
         }
         return result;
