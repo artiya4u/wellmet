@@ -142,9 +142,14 @@ public class App extends Application implements BeaconConsumer {
     }
 
 
-    public UUID getUUID() {
-        long todayStart = (new Date().getTime() / MILLIS_PER_DAY) * MILLIS_PER_DAY;
-        return Utils.genBeaconUUID(Utils.hexToBytes(user.userCode), new Date(todayStart));
+    public UUID getRollingProximityIdentifier() {
+        long timeStampNow = new Date().getTime();
+        long dayNumber = timeStampNow / MILLIS_PER_DAY;
+        long todayStart = dayNumber * MILLIS_PER_DAY;
+        // Smart phone is pretty fast, It's ok to hash a new one ever 15 minutes.
+        byte[] dailyTracingKey = Utils.genDailyTracingKey(Utils.hexToBytes(user.tracingKey));
+        long timeIntervalNumber = (timeStampNow - todayStart) / RESTART_BEACON_INTERVAL;
+        return Utils.genRollingProximityIdentifier(dailyTracingKey, timeIntervalNumber);
     }
 
 
@@ -176,7 +181,7 @@ public class App extends Application implements BeaconConsumer {
             beaconTransmitter.stopAdvertising();
         }
 
-        UUID uuid = getUUID();
+        UUID uuid = getRollingProximityIdentifier();
         Log.d(TAG, "Beacon UUID: " + uuid.toString());
         Beacon beacon = new Beacon.Builder()
                 .setId1(uuid.toString())
